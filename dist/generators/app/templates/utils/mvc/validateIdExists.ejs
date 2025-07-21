@@ -1,0 +1,13 @@
+export async function validateIdExists(model: any, id: any, name = 'Data') {
+ <% if (type === 'sql') { %>
+  const data = await model.findByPk(id);  
+<%  } else { %>
+  const data = await model.findById(id);  
+<% } %>
+  if (!data) {
+    const error = new Error(`${name} not found`) as any;
+    error.statusCode = 404;
+    throw error;
+  }
+  return data;
+}

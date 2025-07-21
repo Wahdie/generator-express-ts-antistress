@@ -1,0 +1,6 @@
+export interface I<%= model.name %> {
+      <% Object.entries(model.fields).forEach(([fieldName, fieldAttributes]) => { %>
+        <%= fieldName %><%= fieldAttributes.required ? '' : '?' %>: <%= mapFieldType(fieldAttributes) %>;
+      <% }); %>
+}
+      

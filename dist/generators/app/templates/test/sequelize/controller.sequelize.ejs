@@ -1,0 +1,43 @@
+import request from 'supertest';
+import app from '../../src/app';
+import { createTest<%- modelName %> } from '../helpers/testFactory';
+
+describe('<%= modelName %> Controller', () => {
+  let createdId: string;
+  <% for (const fk of foreignKeys) { %>
+  let <%= fk.name %>: string;<% } %>
+
+  it('should create a <%= modelName.toLowerCase() %>', async () => {
+    const instance = await createTest<%- modelName %>();
+    <% for (const fk of foreignKeys) { %>
+    <%= fk.name %> = instance.<%= fk.name %>;
+    <% } %>
+    createdId = instance._id || instance.id;
+    expect(createdId).toBeDefined();
+  });
+
+  it('should return all <%= modelName.toLowerCase() %>s', async () => {
+    const res = await request(app).get('/<%- modelName.toLowerCase() %>');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('should return a single <%= modelName.toLowerCase() %>', async () => {
+    const res = await request(app).get(`/<%= modelName.toLowerCase() %>/${createdId}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.<%-toCamelCase(modelName)%>).toHaveProperty('id');
+  });
+
+  it('should update the <%= modelName.toLowerCase() %>', async () => {
+    const res = await request(app)
+      .put(`/<%-modelName.toLowerCase() %>/${createdId}`)
+      .send(<%- toJsLiteral(exampleUpdatePayload)  %>)
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('should delete the <%= modelName.toLowerCase() %>', async () => {
+    const res = await request(app).delete(`/<%= modelName.toLowerCase() %>/${createdId}`);
+    expect(res.statusCode).toBe(200);
+  });
+});

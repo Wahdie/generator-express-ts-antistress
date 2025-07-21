@@ -1,0 +1,29 @@
+import request from 'supertest';
+import app from '../../src/app';
+
+<% models.forEach(model => {
+    const fields = objectToFieldArray(model.fields);
+    const payload = generateExamplePayload(fields, models, true);
+    const foreignKeys = Object.entries(model.fields)
+      .filter(([_, field]) => field.foreignKey && field.references)
+      .map(([fieldName, field]) => {
+      const [refModel] = field.references.split('.');
+      return {
+            name: fieldName,
+            model: refModel,
+      };
+    });
+%>
+export async function createTest<%- model.name %>() {
+  const random = Math.floor(Math.random() * 100000).toString();
+  <% foreignKeys.forEach(fk => { %>
+  const <%- fk.model.toLowerCase() %> = await createTest<%- fk.model %>();
+  const <%- fk.name %> = <%- fk.model.toLowerCase() %>._id || <%- fk.model.toLowerCase() %>.id;
+  <% }) %>
+  const res = await request(app)
+    .post('/<%- model.name.toLowerCase() %>')
+    .send(<%- toJsLiteral(payload).replace(/"(`test_\$\{random\}`)"/g, '$1').replace(/"(`test_text_\$\{random\}`)"/g, '$1')%>);
+
+  return res.body.data.<%- toCamelCase(model.name) %>;
+}
+<% }); %>

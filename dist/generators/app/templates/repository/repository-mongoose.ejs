@@ -1,0 +1,43 @@
+<%_ 
+  const modelName = model.name;
+  const varName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+%>
+import <%- modelName %> from '../models/<%- modelName %>';<% if (model.relations) { Object.values(model.relations).forEach(rel => { %>
+import <%- rel.model %> from '../models/<%- rel.model %>';<% }) } %>
+import { parseId } from '../utils/parseId';
+
+export const <%- varName %>Repository = {
+  findAll: async () => {
+    return await <%- modelName %>.find() <% if (model.relations) { %>
+        .populate([<% Object.entries(model.relations).forEach(([relName, relObj], index, arr) => { %>
+          { path: '<%- relName %>' }<%= index < arr.length - 1 ? ',' : '' %><% }) %>
+        ])<% } %>;
+  },
+
+  findById: async (id: string) => {
+    return await <%- modelName %>.findById(parseId(id))<% if (model.relations) { %>
+        .populate([<% Object.entries(model.relations).forEach(([relName, relObj], index, arr) => { %>
+          { path: '<%- relName %>' }<%= index < arr.length - 1 ? ',' : '' %><% }) %>
+        ])<% } %>;
+  },
+
+  findByField: async (field: string, value: any) => {
+    const filter: any = {};
+    filter[field] = value;
+    return await <%- modelName %>.findOne(filter);
+  },
+
+  create: async (data: any) => {
+    const instance = new <%- modelName %>(data);
+    return await instance.save();
+  },
+
+  update: async (instance: any, data: any) => {
+    Object.assign(instance, data);
+    return await instance.save();
+  },
+
+  delete: async (id: string) => {
+    return await <%- modelName %>.findByIdAndDelete(parseId(id));
+  },
+};

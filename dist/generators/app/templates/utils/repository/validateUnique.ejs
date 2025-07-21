@@ -1,0 +1,54 @@
+export type UniqueFieldOption = {
+  field: string;
+  message?: string;
+};
+
+export async function validateCreateUniqueFields(
+  payload: any,
+  fields: UniqueFieldOption[],
+  repo: any
+): Promise<void> {
+  for (const { field, message } of fields) {
+    const value = payload[field];
+    if (!value) continue;
+    const exists = await repo.findByField(field, value);
+    if (exists) throw new Error(message || `${field} already exists`);
+  }
+}
+/*
+export async function validateUpdateUniqueFields(
+  id: string | number,
+  payload: any,
+  fields: UniqueFieldOption[],
+  repo: any
+): Promise<void> {
+  for (const { field, message } of fields) {
+    const value = payload[field];
+    if (!value) continue;
+    const exists = await repo.findByField(field, value);
+    if (exists && exists.id !== id) throw new Error(message || `${field} already exists`);
+  }
+}
+*/
+export async function validateUpdateUniqueFields(
+  currentId: string | number,
+  payload: Record<string, any>,
+  fields: UniqueFieldOption[],
+  repo: { findByField: (field: string, value: any) => Promise<any> }
+): Promise<void> {
+  for (const { field, message } of fields) {
+    const value = payload[field];
+    if (value === undefined || value === null) continue;
+
+    const existingRecord = await repo.findByField(field, value);
+    const existingRecordId = existingRecord?._id || existingRecord?.id;
+
+    if (existingRecord && String(existingRecordId) !== String(currentId)) {
+      throw {
+        statusCode: 400,
+        field,
+        message: message || `${field} already exists`
+      };
+    }
+  }
+}

@@ -1,0 +1,53 @@
+<%_ 
+  const modelName = model.name;
+  const varName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+%>
+import { Request, Response, NextFunction } from 'express';
+import { <%- varName %>Service } from '../services/<%- modelName %>Service';
+
+export const <%- modelName %>Controller = {
+  getAll: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await <%- varName %>Service.getAll();
+      res.json(data);
+    } catch (err : any) {
+      next(err);
+    }
+  },
+
+  getById: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await <%- varName %>Service.getById(req.params.id);
+      res.json({ status: 'success', data: { <%- varName %>: data } });
+    } catch (err : any) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  create: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await <%- varName %>Service.create(req.body);
+      res.status(201).json({ status: 'success', data: { <%- varName %>: data } });
+    } catch (err : any) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  update: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await <%- varName %>Service.update(req.params.id, req.body);
+      res.json({ status: 'success', data: { <%- varName %>: data } });
+    } catch (err : any) {
+      res.status(400).json({ message: err.message });
+    }
+  },
+
+  delete: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await <%- varName %>Service.delete(req.params.id);
+      res.status(200).json({ status: 'success', message: '<%- modelName %> deleted successfully' });
+    } catch (err : any) {
+      res.status(400).json({ message: err.message });
+    }
+  }
+};

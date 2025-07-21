@@ -1,0 +1,64 @@
+<%_ 
+  const modelName = model.name;
+  const varName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+  const requiredFields = Object.entries(model.fields).filter(([name, field]) => field.required);
+  const uniqueFields = Object.entries(model.fields).filter(([name, field]) => field.unique);
+  const nonPKFields = Object.keys(model.fields).filter(field => !model.fields[field].primaryKey);
+  const pkField = Object.keys(model.fields).find(field => model.fields[field].primaryKey);
+  const allFields = Object.keys(model.fields);
+  const fkPKFields = Object.entries(model.fields).filter(([_, field]) => field.foreignKey && field.primaryKey).map(([name]) => name);
+%>
+
+import { <%- varName %>Repository } from '../repositories/<%- modelName %>Repository';<% if(uniqueFields.length !== 0){ %>
+import { validateCreateUniqueFields, validateUpdateUniqueFields } from '../utils/validateUniqueFields';<% } %><% Object.entries(model.fields).forEach(([fieldName, field]) => {if (field.foreignKey && field.references) {const referencedModel = field.references.split('.')[0]; %>
+import {<%- toCamelCase(referencedModel) %>Repository} from '../repositories/<%- referencedModel %>Repository';<% } }); %>
+
+export const <%- varName %>Service = {
+  getAll: () => <%- varName %>Repository.findAll(),
+
+  getById: async (id: string) => {
+    if (!id) throw new Error('ID is required');
+
+    const data = await <%- varName %>Repository.findById(id);
+    if (!data) throw new Error('<%- modelName %> not found');
+    return data;
+  },
+
+  create: async (payload: any) => {
+    <% requiredFields.forEach(([name]) => { %>
+    if (!payload.<%- name %>) throw new Error('<%- name %> is required');<% }); %>
+    <%if (uniqueFields.length !== 0) { %>
+    await validateCreateUniqueFields(payload, 
+      [<% uniqueFields.forEach(([name]) => { %>{ field: '<%- name %>'},<% }); %>], 
+      <%- varName %>Repository
+    );<% } %> <% Object.entries(model.fields).forEach(([fieldName, field]) => {
+      if (field.foreignKey && field.references) {const referencedModel = field.references.split('.')[0]; %>
+    const related<%- referencedModel %> = await <%-toCamelCase(referencedModel)%>Repository.findById(payload.<%- fieldName %>);
+    if (!related<%- referencedModel %>) throw new Error('<%- referencedModel %> not found');<% } }); %>
+    return await <%- varName %>Repository.create(payload);
+  },
+
+  update: async (id: string, payload: any) => {
+    if (!id) throw new Error('ID is required');
+    
+    const data = await <%- varName %>Repository.findById(id);
+    if (!data) throw new Error('<%- modelName %> not found');<%if( uniqueFields.length !== 0) { %>
+    await validateUpdateUniqueFields(id, payload, 
+      [<% uniqueFields.forEach(([name]) => { %>{ field: '<%- name %>'},<% }); %>], 
+      <%- varName %>Repository
+    );<% } %> <% Object.entries(model.fields).forEach(([fieldName, field]) => {
+    if (field.foreignKey && field.references) { const referencedModel = field.references.split('.')[0]; %>
+    const related<%- referencedModel %> = await <%-toCamelCase(referencedModel)%>Repository.findById(payload.<%- fieldName %>);
+    if (!related<%- referencedModel %>) throw new Error('<%- referencedModel %> not found');<% } }); %>
+
+    return await <%- varName %>Repository.update(data, payload);
+  },
+
+  delete: async (id: string) => {
+    if (!id) throw new Error('ID is required');
+    
+    const data = await <%- varName %>Repository.findById(id);
+    if (!data) throw new Error('<%- modelName %> not found');
+    return await <%- varName %>Repository.delete(id);
+  }
+};

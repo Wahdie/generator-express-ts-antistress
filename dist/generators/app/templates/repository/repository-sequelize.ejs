@@ -1,0 +1,33 @@
+<%_ 
+  const modelName = model.name;
+  const varName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+%>
+import <%- modelName %> from '../models/<%- modelName %>';<% if (model.relations) { Object.values(model.relations).forEach(rel => { %>
+import <%- rel.model %> from '../models/<%- rel.model %>';<% }) } %>
+import { parseId } from '../utils/parseId';
+
+export const <%- varName %>Repository = {
+  findAll: () => <%- modelName %>.findAll({
+    <% if (model.relations) { %>
+    include: [<% Object.values(model.relations).forEach(rel => { %>
+      { model: <%- rel.model %> },
+    <% }) %>]
+    <% } %>
+  }),
+
+  findById: (id: string) => <%- modelName %>.findByPk(parseId(id), {<% if (model.relations) { %>
+    include: [<% Object.values(model.relations).forEach(rel => { %>
+      { model: <%- rel.model %> },
+    <% }) %>]<% } %>
+  }),
+
+  findByField: (field: string, value: any) =>
+    <%- modelName %>.findOne({ where: { [field]: value } }),
+
+  create: (data: any) => <%- modelName %>.create(data),
+
+  update: (instance: any, data: any) => instance.update(data),
+
+  delete: (id: string) => <%- modelName %>.destroy({ where: { id: parseId(id) } }),
+
+};

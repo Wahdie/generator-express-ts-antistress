@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import { <%-model.name%>Controller } from '../controllers/<%-model.name%>Controller';
+
+const <%-model.name%>Router = Router();
+
+<%-model.name%>Router.get('/', <%-model.name%>Controller.getAll);
+<%-model.name%>Router.get('/:id', <%-model.name%>Controller.getById);
+<%-model.name%>Router.post('/', <%-model.name%>Controller.create);
+<%-model.name%>Router.put('/:id', <%-model.name%>Controller.update);
+<%-model.name%>Router.delete('/:id', <%-model.name%>Controller.delete);
+
+export default <%-model.name%>Router;

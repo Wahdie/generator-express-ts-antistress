@@ -1,0 +1,14 @@
+export const parseId = (id: any) => {
+  if (!id) throw new Error('ID is required');
+  <% if(type === 'sql') {%>
+  const parsed = Number(id);
+  if (isNaN(parsed)) throw new Error('ID must be a number');
+  return parsed;
+  <% } else if (type === 'nosql') {%>
+  if (typeof id !== 'string' || !id.match(/^[a-f\d]{24}$/i)) {
+    throw new Error('Invalid MongoDB ObjectId');
+  }
+  return id;
+  <% } %>
+
+};

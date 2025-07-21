@@ -1,0 +1,39 @@
+<% models.forEach(model => { %>import <%= model.name %> from './<%= model.name %>';
+<% }); %>
+
+<% models.forEach(model => { 
+  if (model.relations) {
+    Object.entries(model.relations).forEach(([relationName, relation]) => {
+%>
+<% if (relation.type === 'hasMany') { %>
+<%= model.name %>.hasMany(<%= relation.model %>, { 
+  foreignKey: '<%= relation.foreignKey || `${model.name.toLowerCase()}Id` %>',
+  onDelete: '<%= relation.onDelete || 'CASCADE' %>',
+  onUpdate: '<%= relation.onUpdate || 'CASCADE' %>'
+});
+<% } else if (relation.type === 'hasOne') { %>
+<%= model.name %>.hasOne(<%= relation.model %>, { 
+  foreignKey: '<%= relation.foreignKey || `${model.name.toLowerCase()}Id` %>',
+  onDelete: '<%= relation.onDelete || 'CASCADE' %>',
+  onUpdate: '<%= relation.onUpdate || 'CASCADE' %>'
+});
+<% } else if (relation.type === 'belongsTo') { %>
+<%= model.name %>.belongsTo(<%= relation.model %>, { 
+  foreignKey: '<%= relation.foreignKey || `${relationName}Id` %>'<%=
+    relation.targetKey ? `,\n  targetKey: '${relation.targetKey}'` : '' %>
+});
+<% } else if (relation.type === 'belongsToMany' || relation.type === 'manyToMany') { %>
+<%= model.name %>.belongsToMany(<%= relation.model %>, { 
+  through: '<%= relation.through %>',
+  foreignKey: '<%= relation.foreignKey || `${model.name.toLowerCase()}Id` %>',
+  otherKey: '<%= relation.otherKey || `${relation.model.toLowerCase()}Id` %>'
+});
+<% } %>
+<% })} }) %>
+
+export {
+<% models.forEach((model, index) => { %>
+  <%= model.name %><%= index < models.length - 1 ? ',' : '' %>
+<% }) %>
+};
+

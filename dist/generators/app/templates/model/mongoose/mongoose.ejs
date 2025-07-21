@@ -1,0 +1,104 @@
+<%_ 
+  const hasIdField = Object.keys(model.fields).includes('id');
+%>
+import mongoose, { Schema, Document } from 'mongoose';
+
+export interface I<%- model.name %> extends Document {
+<% if (!hasIdField) { %>
+  id: mongoose.Types.ObjectId;
+<% } %>
+<% Object.entries(model.fields).forEach(([fieldName, field]) => { %>
+  <%- fieldName %><%- field.required ? '' : '?' %>: <%- 
+    fieldName === 'id' ? 'mongoose.Schema.Types.ObjectId' :
+    field.type === 'integer' ? 'number' :
+    field.type === 'boolean' ? 'boolean' :
+    field.type === 'Date' ? 'Date' :
+    field.type === 'array' ? 'any[]' :
+    field.type === 'enum' ? 'string' :
+    'string' 
+  %>;
+<% }); %>
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+const <%- model.name %>Schema = new Schema<I<%- model.name %>>({
+<% Object.entries(model.fields).forEach(([fieldName, field]) => {
+     const isPrimaryKey = field.primaryKey === true;
+     const isForeignKey = field.foreignKey === true;
+     const refModel = isForeignKey && field.references ? field.references.split('.')[0] : null;
+%>
+    <%- fieldName %>: {
+      <%- isForeignKey || isPrimaryKey ? "type: mongoose.Schema.Types.ObjectId," : 
+      `type: ${
+        field.type === 'integer' ? 'Number' :
+        field.type === 'boolean' ? 'Boolean' :
+        field.type === 'Date' ? 'Date' :
+        field.type === 'array' ? '[Schema.Types.Mixed]' :
+        field.type === 'enum' ? `[${field.values.map(v => `'${v}'`).join(', ')}]` : 'String'},` %>
+      <%- isForeignKey && refModel ? `ref: '${refModel}',` : '' %>
+      <%- field.required ? 'required: true,' : '' %>
+      <%- field.unique ? 'unique: true,' : '' %>
+      <%- field.default === 'NOW' ? 'default: Date.now,' : field.default ? `default: ${JSON.stringify(field.default)},` : '' %>
+    },
+<% }); %>
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+    toJSON: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      }
+    }
+  }
+);
+
+
+
+
+// Virtual Populate for Relationships (1)
+<% Object.entries(model.relations).forEach(([relationName, relation]) => {
+  const relationType = relation.type;
+  let targetModel = relation.model;
+  const targetModelLower = targetModel.toLowerCase();
+  const modelLower = model.name.toLowerCase();
+
+  let localField, foreignField;
+
+  if (relationType === 'belongsTo' ) {
+    // Child side — Post belongsTo User → Post.userId = User._id
+    localField = Object.entries(model.fields).find(([_, f]) => f.foreignKey && f.references.startsWith(relation.model))?.[0] || `${targetModelLower}Id`;
+    foreignField = '_id';
+  } else if (relationType === 'hasMany' || relationType === 'hasOne') {
+    // Parent side — User hasMany Post → Post.userId = User._id
+    localField = '_id';
+    foreignField = `${modelLower}Id`;
+  } else if (relationType === 'manyToMany' && relation.through) {
+    // Many-to-many relationship with a through table
+    localField = '_id';
+    foreignField = `${modelLower}Id`;
+    targetModel = relation.through;
+  } else {
+    return;
+  }
+%>
+<%- model.name %>Schema.virtual('<%- relationName %>', {
+  ref: '<%- targetModel %>',
+  localField: '<%- localField %>',
+  foreignField: '<%- foreignField %>',
+  justOne: <%- relationType === 'belongsTo' || relationType === 'hasOne' ? 'true' : 'false' %>
+});
+<% }); %>
+
+
+
+
+const <%- model.name %> = mongoose.model<I<%- model.name %>>('<%- model.name %>', <%- model.name %>Schema);
+
+export default <%- model.name %>;
+
