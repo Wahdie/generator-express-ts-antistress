@@ -1,0 +1,163 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true, "unique": true },
+        "password": { "type": "string", "required": true },
+        "role": { "type": "string", "enum": ["admin", "customer"], "default": "customer" },
+        "isActive": { "type": "boolean", "default": true }
+      },
+      "relations": {
+        "orders": { "type": "hasMany", "model": "Order", "cascadeDelete": true },
+        "cart": { "type": "hasOne", "model": "Cart", "cascadeDelete": true },
+        "address": { "type": "hasMany", "model": "Address", "cascadeDelete": true }
+      }
+    },
+    {
+      "name": "Address",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE"
+        },
+        "street": { "type": "string", "required": true },
+        "city": { "type": "string", "required": true },
+        "state": { "type": "string" },
+        "postalCode": { "type": "string" },
+        "country": { "type": "string", "required": true },
+        "isPrimary": { "type": "boolean", "default": false }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" }
+      }
+    },
+    {
+      "name": "Product",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true },
+        "description": { "type": "text" },
+        "price": { "type": "float", "required": true },
+        "stock": { "type": "integer", "default": 0 },
+        "categoryId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Category.id",
+          "onDelete": "SET NULL"
+        }
+      },
+      "relations": {
+        "category": { "type": "belongsTo", "model": "Category" },
+        "orderItems": { "type": "hasMany", "model": "OrderItem" },
+        "cartItems": { "type": "hasMany", "model": "CartItem" }
+      }
+    },
+    {
+      "name": "Category",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true, "unique": true }
+      },
+      "relations": {
+        "products": { "type": "hasMany", "model": "Product" }
+      }
+    },
+    {
+      "name": "Cart",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "unique": true,
+          "onDelete": "CASCADE"
+        }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" },
+        "items": { "type": "hasMany", "model": "CartItem", "cascadeDelete": true }
+      }
+    },
+    {
+      "name": "CartItem",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "cartId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Cart.id",
+          "onDelete": "CASCADE"
+        },
+        "productId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Product.id"
+        },
+        "quantity": { "type": "integer", "required": true }
+      },
+      "relations": {
+        "cart": { "type": "belongsTo", "model": "Cart" },
+        "product": { "type": "belongsTo", "model": "Product" }
+      }
+    },
+    {
+      "name": "Order",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE"
+        },
+        "addressId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Address.id"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "shipped", "delivered", "cancelled"],
+          "default": "pending"
+        },
+        "totalAmount": { "type": "float", "required": true },
+        "placedAt": { "type": "datetime", "required": true }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" },
+        "items": { "type": "hasMany", "model": "OrderItem", "cascadeDelete": true },
+        "address": { "type": "belongsTo", "model": "Address" }
+      }
+    },
+    {
+      "name": "OrderItem",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "orderId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Order.id",
+          "onDelete": "CASCADE"
+        },
+        "productId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Product.id"
+        },
+        "quantity": { "type": "integer", "required": true },
+        "priceAtPurchase": { "type": "float", "required": true }
+      },
+      "relations": {
+        "order": { "type": "belongsTo", "model": "Order" },
+        "product": { "type": "belongsTo", "model": "Product" }
+      }
+    }
+  ]
+}

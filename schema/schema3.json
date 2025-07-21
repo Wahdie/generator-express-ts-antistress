@@ -1,0 +1,40 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true, "unique": true },
+        "password": { "type": "string", "required": true }
+      },
+      "relations": {
+        "posts": {
+          "type": "hasMany",
+          "model": "Post",
+          "cascadeDelete": true
+        }
+      }
+    },
+    {
+      "name": "Post",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "title": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "photo": { "type": "string" },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" }
+      }
+    }
+  ]
+}
+    

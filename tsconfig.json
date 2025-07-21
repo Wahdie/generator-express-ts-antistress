@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "rootDir": "./",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    // "preserveConstEnums": true,
+    // "sourceMap": true
+  },
+  "include": ["generators/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "**/*.ejs",
+    "**/templates/**"
+  ]
+}

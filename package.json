@@ -1,0 +1,52 @@
+{
+  "name": "generator-express-ts-antistress",
+  "version": "1.0.0",
+  "description": "A Yeoman generator to scaffold an Express.js TypeScript project using MVC and Layered Architecture.",
+  "main": "./dist/generators/app/index.js",
+  "keywords": [
+    "yeoman-generator",
+    "generator",
+    "express",
+    "typescript",
+    "antistress",
+    "oop",
+    "mvc",
+    "layered",
+    "rest",
+    "api",
+    "boilerplate"
+  ],
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "tsc && cp -R generators/app/templates dist/generators/app",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build",
+    "dev": "npm run build && npm link"
+  },
+  "author": "Farid Anwar Wahdie",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/ejs": "^3.1.5",
+    "@types/jest": "^30.0.0",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.15.3",
+    "ejs": "^3.1.10",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@yeoman/types": "^1.6.0",
+    "ajv": "^8.17.1",
+    "commander": "^13.1.0",
+    "express": "^4.21.2",
+    "yeoman-generator": "^7.5.1"
+  }
+}

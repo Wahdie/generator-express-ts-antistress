@@ -1,0 +1,112 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true, "unique": true },
+        "password": { "type": "string", "required": true },
+        "role": { "type": "string", "enum": ["admin", "editor", "user"], "default": "user" },
+        "isActive": { "type": "boolean", "default": true }
+      },
+      "relations": {
+        "posts": { "type": "hasMany", "model": "Post", "cascadeDelete": true },
+        "comments": { "type": "hasMany", "model": "Comment", "cascadeDelete": true },
+        "profile": { "type": "hasOne", "model": "Profile", "cascadeDelete": true }
+      }
+    },
+    {
+      "name": "Profile",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "bio": { "type": "string" },
+        "website": { "type": "string" },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "unique": true,
+          "onDelete": "CASCADE"
+        }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" }
+      }
+    },
+    {
+      "name": "Post",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "title": { "type": "string", "required": true },
+        "content": { "type": "text", "required": true },
+        "photo": { "type": "string" },
+        "publishedAt": { "type": "datetime" },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE"
+        }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" },
+        "comments": { "type": "hasMany", "model": "Comment", "cascadeDelete": true },
+        "tags": { "type": "manyToMany", "model": "Tag", "through": "PostTags" }
+      }
+    },
+    {
+      "name": "Comment",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "content": { "type": "string", "required": true },
+        "postId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Post.id",
+          "onDelete": "CASCADE"
+        },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "SET NULL"
+        }
+      },
+      "relations": {
+        "post": { "type": "belongsTo", "model": "Post" },
+        "user": { "type": "belongsTo", "model": "User" }
+      }
+    },
+    {
+      "name": "Tag",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true, "unique": true }
+      },
+      "relations": {
+        "posts": { "type": "manyToMany", "model": "Post", "through": "PostTags" }
+      }
+    },
+    {
+      "name": "PostTags",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "postId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Post.id"
+        },
+        "tagId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Tag.id"
+        }
+      },
+      "relations": {
+        "post": { "type": "belongsTo", "model": "Post" },
+        "tag": { "type": "belongsTo", "model": "Tag" }
+      }
+    }
+  ]
+}

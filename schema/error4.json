@@ -1,0 +1,19 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "fields": {
+        "name": { "type": "string" }
+      },
+      "relations": {
+        "posts": { "type": "hasMany" } 
+      }
+    },
+    {
+      "name": "Post",
+      "fields": {
+        "title": { "type": "string" }
+      }
+    }
+  ]
+}

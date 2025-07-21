@@ -1,0 +1,11 @@
+{
+  "models": [
+    {
+      "name": "Product",
+      "fields": {
+        "name": { "type": "varchar" }, 
+        "price": { "type": "integer" }
+      }
+    }
+  ]
+}
