@@ -64,6 +64,7 @@ Generator akan membuat direktori proyek baru dan menghasilkan semua file yang di
 
 -----
 
+
 ## Struktur Skema JSON
 
 Skema JSON adalah jantung dari generator ini. Ini adalah file di mana Anda mendefinisikan semua model, field, dan relasi untuk aplikasi Anda.
@@ -74,10 +75,29 @@ File skema harus memiliki properti root `models` yang berisi sebuah array dari o
 
 | Properti | Tipe | Wajib? | Deskripsi |
 | :--- | :--- | :---: | :--- |
-| `name` | `string` | ✅ | Nama model (e.g., "User", "ProductCategory"). |
-| `fields` | `object` | ✅ | Objek yang berisi definisi semua field untuk model ini. |
-| `relations`| `object` | | Objek yang berisi definisi relasi ke model lain. |
+| `name` | `string` | Ya | Nama model (e.g., "User", "ProductCategory"). |
+| `fields` | `object` | Ya | Objek yang berisi definisi semua field untuk model ini. |
+| `relations`| `object` | Tidak | Objek yang berisi definisi relasi ke model lain. |
 
+```
+{
+
+  "models":[
+    {
+      "name" : "NamaModel", // wajib
+      "fields" : { // wajib
+        "field1" : {"type": "tipe-data"} 
+      },
+      "relations" : { // opsional
+        "relations1": {"model": "NamaModelLain", "type": "tipe-relasi"}
+      }
+
+    }
+  ]
+}
+
+
+```
 ### Properti Field
 
 Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *value* adalah objek konfigurasinya.
@@ -91,14 +111,14 @@ Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *va
 | `unique` | `boolean`| Nilai field ini harus unik di dalam tabel. |
 | `default` | `any` | Nilai default jika tidak ada nilai yang diberikan. |
 | `enum` | `array` | Daftar nilai yang diizinkan untuk field bertipe string/enum. |
-| `foreignKey`| `boolean`| Menandakan field ini sebagai foreign key. **Wajib ada** pada field yang menjadi dasar relasi `belongsTo`. |
-| `references`| `string` | Nama model dan field yang direferensikan (format: `"Model.field"`). |
+| `foreignKey`| `boolean`| Menandakan field ini sebagai foreign key. **Wajib ada** pada field yang menjadi dasar relasi `belongsTo` (format: `ModelNameId`, contoh: userId). |
+| `references`| `string` | Nama model dan field yang direferensikan (format: `"Model.Id"`, misal User.Id). |
 | `onDelete` | `string` | Aksi saat data di tabel referensi dihapus (e.g., "CASCADE", "SET NULL"). |
 | `onUpdate` | `string` | Aksi saat data di tabel referensi di-update (e.g., "CASCADE"). |
 
-**Tipe Data yang Diizinkan 
-`type`:**
+**Tipe Data yang bisa digunakan untuk `type`:**
 `string`, `text`, `integer`, `float`, `double`, `decimal`, `bigint`, `boolean`, `date`, `datetime`, `timestamp`, `time`, `uuid`, `varchar`, `char`, `smallint`, `mediumint`, `tinyint`, `json`, `jsonb`, `object`, `array`, `blob`, `binary`, `enum`, `objectId`.
+
 
 ### Properti Relation
 
@@ -110,6 +130,29 @@ Properti `relations` mendefinisikan hubungan antar model.
 | `model`| `string` | **Wajib.** Nama model target yang berelasi (harus PascalCase). |
 | `through`| `string` | **Wajib untuk `manyToMany`**. Nama model junction/pivot table. |
 | `cascadeDelete`|`boolean`| Jika `true`, menghapus data induk akan menghapus data anak yang berelasi. |
+
+### Jenis-Jenis Relasi
+Berikut adalah penjelasan untuk setiap type relasi yang dapat Anda gunakan:
+
+1. hasOne (Satu ke Satu)
+Menjelaskan bahwa satu baris data di model ini terhubung dengan tepat satu baris data di model lain.
+- Contoh: Satu User memiliki satu Profile.
+- Struktur Kunci: Foreign key biasanya berada di model target (tabel profiles memiliki user_id).
+
+2. hasMany (Satu ke Banyak)
+Menjelaskan bahwa satu baris data di model ini terhubung dengan banyak baris data di model lain.
+- Contoh: Satu User memiliki banyak Post.
+- Struktur Kunci: Foreign key berada di model target (tabel posts memiliki userId).
+
+3. belongsTo (Dimiliki Oleh)
+Ini adalah kebalikan dari relasi hasOne atau hasMany. Relasi ini menyatakan bahwa model ini "milik" satu baris data di model lain.
+- Contoh: Satu Post dimiliki oleh (belongsTo) satu User.
+- Struktur Kunci: Foreign key berada di model ini (tabel posts harus memiliki field userId).
+
+4. manyToMany (Banyak ke Banyak)
+Hubungan kompleks di mana banyak baris data di model ini bisa terhubung dengan banyak baris data di model lain.
+- Contoh: Satu Post bisa memiliki banyak Tag, dan satu Tag bisa digunakan di banyak Post.
+- Struktur Kunci: Relasi ini wajib menggunakan tabel perantara (junction/pivot table) untuk menyimpan pasangannya. Nama model tabel perantara ini didefinisikan di properti through.
 
 ### Contoh Lengkap
 
@@ -261,10 +304,3 @@ Setelah proyek dibuat, masuk ke direktori proyek dan jalankan:
     ```
 
 -----
-
-## Lisensi
-
-Didistribusikan di bawah Lisensi MIT. Lihat `LICENSE` untuk informasi lebih lanjut.
-
-```
-```

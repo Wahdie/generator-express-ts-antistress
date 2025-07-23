@@ -21,6 +21,7 @@ class ToolingConfigurator {
                 { template: 'tsconfig.ejs', output: 'tsconfig.json' },
                 { template: 'prettierrc.ejs', output: '.prettierrc' },
                 { template: 'jestconfig.ejs', output: 'jest.config.js' },
+                { template: 'README.md.ejs', output: 'README.md' },
             ];
             const context = this.dbType === 'sql' ? { dbType: 'sql' } : { dbType: 'nosql' };
             configFiles.forEach(({ template, output }) => {

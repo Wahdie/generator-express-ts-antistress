@@ -26,7 +26,8 @@
     "build": "tsc && cp -R generators/app/templates dist/generators/app",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build",
-    "dev": "npm run build && npm link"
+    "dev": "npm run build && npm link",
+    "test": "jest --config jest.config.js"
   },
   "author": "Farid Anwar Wahdie",
   "license": "ISC",

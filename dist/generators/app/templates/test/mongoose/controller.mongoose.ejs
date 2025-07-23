@@ -26,7 +26,7 @@ describe('<%= modelName %> Controller', () => {
   it('should return a single <%= modelName.toLowerCase() %>', async () => {
     const res = await request(app).get(`/<%= modelName.toLowerCase() %>/${createdId}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.<%- toCamelCase(modelName) %>).toHaveProperty('id');
+    expect(res.body.data.<%- toCamelCase(modelName) %>).toHaveProperty('_id');
   });
 
   it('should update the <%= modelName.toLowerCase() %>', async () => {
