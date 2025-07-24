@@ -39,9 +39,14 @@ Pastikan perangkat Anda telah terinstal:
 
 ---
 
-## Instalasi
+## Instalasi Lokal
 ```bash
-npm install -g express-ts-antistress
+npm install generator-express-ts-antistress
+````
+---
+## Instalasi Global
+```bash
+npm install -g generator-express-ts-antistress
 ````
 
 -----

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const yeoman_generator_1 = __importDefault(require("yeoman-generator"));
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const SchemaValidator_1 = require("./SchemaValidator");
 const ProjectGenerator_1 = require("./ProjectGenerator");
 const ToolingConfigurator_1 = require("./ToolingConfigurator");
@@ -19,7 +20,7 @@ class AppGenerator extends yeoman_generator_1.default {
         this.dbDialect = "mysql";
         this.dbType = "sql";
         this.outputPath = ".";
-        this.fileTemplatePath = "generators/app/templates/";
+        this.fileTemplatePath = path_1.default.resolve(__dirname, 'templates');
     }
     async prompting() {
         const answers = await this.prompt([
