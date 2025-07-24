@@ -1,6 +1,6 @@
 {
   "name": "generator-express-ts-antistress",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A Yeoman generator to scaffold an Express.js TypeScript project using MVC and Layered Architecture.",
   "main": "./dist/generators/app/index.js",
   "keywords": [
