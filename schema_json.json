@@ -1,0 +1,437 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "uuid": {
+          "type": "uuid",
+          "unique": true,
+          "required": true
+        },
+        "email": {
+          "type": "varchar",
+          "required": true,
+          "unique": true
+        },
+        "username": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "password": {
+          "type": "string",
+          "required": true
+        },
+        "firstName": {
+          "type": "string",
+          "required": true
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "age": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "enum",
+          "enum": ["active", "inactive", "suspended"],
+          "default": "active"
+        },
+        "isVerified": {
+          "type": "boolean",
+          "default": false
+        },
+        "lastLoginAt": {
+          "type": "datetime"
+        }
+       
+      },
+      "relations": {
+        "profile": {
+          "type": "hasOne",
+          "model": "Profile"
+        },
+        "posts": {
+          "type": "hasMany",
+          "model": "Post",
+          "cascadeDelete": true
+        },
+        "comments": {
+          "type": "hasMany",
+          "model": "Comment",
+          "cascadeDelete": true
+        }
+      }
+    },
+    {
+      "name": "Profile",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "userId": {
+          "type": "integer",
+          "unique": true,
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "text"
+        },
+        "phone": {
+          "type": "varchar"
+        },
+        "address": {
+          "type": "json"
+        },
+        "birthDate": {
+          "type": "date"
+        },
+        "gender": {
+          "type": "enum",
+          "enum": ["male", "female", "other"]
+        },
+        "website": {
+          "type": "string"
+        },
+        "socialMedia": {
+          "type": "json"
+        }
+      },
+      "relations": {
+        "user": {
+          "type": "belongsTo",
+          "model": "User"
+        }
+      }
+    },
+    {
+      "name": "Category",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "description": {
+          "type": "text"
+        },
+        "color": {
+          "type": "varchar"
+        },
+        "isActive": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "relations": {
+        "posts": {
+          "type": "hasMany",
+          "model": "Post"
+        }
+      }
+    },
+    {
+      "name": "Post",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "categoryId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Category.id",
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        },
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "content": {
+          "type": "text",
+          "required": true
+        },
+        "excerpt": {
+          "type": "string"
+        },
+        "featuredImage": {
+          "type": "string"
+        },
+        "status": {
+          "type": "enum",
+          "enum": ["draft", "published", "archived"],
+          "default": "draft"
+        },
+        "viewCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "likesCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "metadata": {
+          "type": "json"
+        },
+        "publishedAt": {
+          "type": "datetime"
+        }
+      },
+      "relations": {
+        "author": {
+          "type": "belongsTo",
+          "model": "User"
+        },
+        "category": {
+          "type": "belongsTo",
+          "model": "Category"
+        },
+        "comments": {
+          "type": "hasMany",
+          "model": "Comment",
+          "cascadeDelete": true
+        },
+        "tags": {
+          "type": "manyToMany",
+          "model": "Tag",
+          "through": "PostTag"
+        }
+      }
+    },
+    {
+      "name": "Tag",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "name": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "slug": {
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "description": {
+          "type": "text"
+        },
+        "color": {
+          "type": "varchar"
+        },
+        "usageCount": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "relations": {
+        "posts": {
+          "type": "manyToMany",
+          "model": "Post",
+          "through": "PostTag"
+        }
+      }
+    },
+    {
+      "name": "PostTag",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "postId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Post.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "tagId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Tag.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        }
+      },
+      "relations": {
+        "post": {
+          "type": "belongsTo",
+          "model": "Post"
+        },
+        "tag": {
+          "type": "belongsTo",
+          "model": "Tag"
+        }
+      }
+    },
+    {
+      "name": "Comment",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "postId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Post.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "userId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "parentId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Comment.id",
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        "content": {
+          "type": "text",
+          "required": true
+        },
+        "isEdited": {
+          "type": "boolean",
+          "default": false
+        },
+        "likesCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "status": {
+          "type": "enum",
+          "enum": ["approved", "pending", "rejected"],
+          "default": "pending"
+        }
+      },
+      "relations": {
+        "post": {
+          "type": "belongsTo",
+          "model": "Post"
+        },
+        "author": {
+          "type": "belongsTo",
+          "model": "User"
+        },
+        "parent": {
+          "type": "belongsTo",
+          "model": "Comment"
+        },
+        "replies": {
+          "type": "hasMany",
+          "model": "Comment",
+          "cascadeDelete": true
+        }
+      }
+    },
+    {
+      "name": "Media",
+      "fields": {
+        "id": {
+          "type": "integer",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        "filename": {
+          "type": "string",
+          "required": true
+        },
+        "originalName": {
+          "type": "string",
+          "required": true
+        },
+        "mimeType": {
+          "type": "string",
+          "required": true
+        },
+        "size": {
+          "type": "bigint",
+          "required": true
+        },
+        "path": {
+          "type": "string",
+          "required": true
+        },
+        "url": {
+          "type": "string",
+          "required": true
+        },
+        "alt": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "text"
+        },
+        "metadata": {
+          "type": "json"
+        },
+        "isPublic": {
+          "type": "boolean",
+          "default": true
+        },
+        "uploadedBy": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        }
+      },
+      "relations": {
+        "uploader": {
+          "type": "belongsTo",
+          "model": "User"
+        }
+      }
+    }
+  ]
+}

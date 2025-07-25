@@ -122,7 +122,7 @@ Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *va
 | `onUpdate` | `string` | Aksi saat data di tabel referensi di-update (e.g., "CASCADE"). |
 
 **Tipe Data yang bisa digunakan untuk `type`:**
-`string`, `text`, `integer`, `float`, `double`, `decimal`, `bigint`, `boolean`, `date`, `datetime`, `timestamp`, `time`, `uuid`, `varchar`, `char`, `smallint`, `mediumint`, `tinyint`, `json`, `jsonb`, `object`, `array`, `blob`, `binary`, `enum`, `objectId`.
+`string`, `text`, `integer`, `float`, `double`, `decimal`, `bigint`, `boolean`, `date`, `datetime`, `timestamp`, `time`, `uuid`, `varchar`, `char`, `smallint`, `mediumint`, `tinyint`, `json`, `object`, `array`, `blob`, `binary`, `enum`, `objectId`.
 
 
 ### Properti Relation

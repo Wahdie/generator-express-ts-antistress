@@ -6,7 +6,7 @@ const fieldSchema = {
         type: { type: 'string', enum: [
                 "string", "text", "integer", "float", "double", "decimal", "bigint", "boolean",
                 "date", "datetime", "timestamp", "time", "uuid", "varchar", "char", "smallint",
-                "mediumint", "tinyint", "json", "jsonb", "object", "array", "blob", "binary",
+                "mediumint", "tinyint", "json", "object", "array", "blob", "binary",
                 "enum"
             ]
         },

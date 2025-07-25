@@ -94,14 +94,36 @@ class SchemaValidator {
                         }
                     }
                     // --- VALIDASI BARU: Memastikan foreign key ada untuk relasi belongsTo ---
+                    // if (rel.type === 'belongsTo') {
+                    //   // const expectedFkFieldName = `${relName}Id`; // e.g., 'user' relation expects 'userId' field
+                    //   const expectedFkFieldName = `${rel.model.toLocaleLowerCase()}Id`; // e.g., 'user' relation expects 'userId' field
+                    //   const expectedFkFieldName2 = `${relName}Id`;
+                    //   const fkField = model.fields[expectedFkFieldName] || model.fields[expectedFkFieldName2];
+                    //   if (!fkField) {
+                    //     throw new Error(
+                    //       `Error di model '${model.name}': Relasi 'belongsTo' bernama '${relName}' tidak memiliki foreign key. Diharapkan ada field bernama '${expectedFkFieldName}'.`
+                    //     );
+                    //   }
+                    //   if (!fkField.foreignKey) {
+                    //     throw new Error(
+                    //       `Error di model '${model.name}': Field '${expectedFkFieldName}' yang berhubungan dengan relasi '${relName}' harus memiliki properti "foreignKey": true.`
+                    //     );
+                    //   }
+                    // }
                     if (rel.type === 'belongsTo') {
-                        const expectedFkFieldName = `${relName}Id`; // e.g., 'user' relation expects 'userId' field
-                        const fkField = model.fields[expectedFkFieldName];
-                        if (!fkField) {
-                            throw new Error(`Error di model '${model.name}': Relasi 'belongsTo' bernama '${relName}' tidak memiliki foreign key. Diharapkan ada field bernama '${expectedFkFieldName}'.`);
+                        const targetModel = rel.model;
+                        let foreignKeyFieldFound = null;
+                        for (const [fieldName, fieldDef] of Object.entries(model.fields)) {
+                            if (fieldDef &&
+                                fieldDef.foreignKey &&
+                                typeof fieldDef.references === 'string' &&
+                                fieldDef.references.toLowerCase().startsWith(targetModel.toLowerCase())) {
+                                foreignKeyFieldFound = fieldName;
+                                break;
+                            }
                         }
-                        if (!fkField.foreignKey) {
-                            throw new Error(`Error di model '${model.name}': Field '${expectedFkFieldName}' yang berhubungan dengan relasi '${relName}' harus memiliki properti "foreignKey": true.`);
+                        if (!foreignKeyFieldFound) {
+                            throw new Error(`Error di model '${model.name}': Relasi 'belongsTo' bernama '${relName}' mengarah ke model '${rel.model}', tetapi tidak ditemukan field manapun dengan 'foreignKey: true' dan 'references' mengarah ke '${rel.model}'.`);
                         }
                     }
                 }

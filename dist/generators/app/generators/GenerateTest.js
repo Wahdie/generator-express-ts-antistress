@@ -7,6 +7,7 @@ exports.TestGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const crypto_1 = require("crypto");
 class TestGenerator {
     constructor(outputPath, models, dbType, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -212,6 +213,7 @@ class TestGenerator {
                 return isUpdate ? `updated_text_${this.generateRandomString()}` : "`test_text_${random}`";
             // Numeric types
             case "number":
+            case "int":
             case "integer":
             case "smallint":
             case "mediumint":
@@ -222,7 +224,7 @@ class TestGenerator {
             case "decimal":
                 return this.generateRandomDecimal(1, 100, 2);
             case "bigint":
-                return BigInt(this.generateRandomInteger(1000000000, 9999999999));
+                return Number(this.generateRandomInteger(1000000000, 9999999999));
             case "boolean":
                 return Math.random() > 0.5;
             case "date":
@@ -230,11 +232,8 @@ class TestGenerator {
             case "timestamp":
                 return new Date().toISOString();
             case "uuid":
-                return isUpdate
-                    ? "550e8400-e29b-41d4-a716-446655440001"
-                    : "550e8400-e29b-41d4-a716-446655440000";
+                return (0, crypto_1.randomUUID)();
             case "json":
-            case "jsonb":
             case "object":
                 return { key: isUpdate ? "updated_value" : "test_value" };
             case "array":
