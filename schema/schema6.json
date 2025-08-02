@@ -1,14 +1,4 @@
 {
-  "projectName": "my-app",
-  "database": {
-    "type": "nosql",
-    "host": "localhost",
-    "port": 3000,
-    "username": "root",
-    "password": "password",
-    "databaseName": "my_database"
-  },
-  "templatingEngine": "ejs",
   "models": [
     {
       "name": "User",
