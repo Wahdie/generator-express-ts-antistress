@@ -355,6 +355,7 @@ Contoh schema.json
   ]
 }
 ```
+Contoh lain bisa dilihat disini: https://github.com/Wahdie/generator-express-ts-antistress/tree/main/schema
 
 -----
 
