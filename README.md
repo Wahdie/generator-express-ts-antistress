@@ -18,7 +18,7 @@ Sebuah generator CLI untuk menghilangkan stres saat memulai proyek REST API baru
   - [Properti Relation](#properti-relation)
   - [Contoh Lengkap](#contoh-lengkap)
 - [Struktur Proyek yang Dihasilkan](#struktur-proyek-yang-dihasilkan)
-- [Perintah yang Tersedia](#perintah-yang-tersedia)
+- [Penggunaan API](#penggunaan-api)
 - [Lisensi](#lisensi)
 
 ---
@@ -29,22 +29,25 @@ Sebuah generator CLI untuk menghilangkan stres saat memulai proyek REST API baru
 - ✍️ **Generasi CRUD Otomatis:** Endpoint CRUD lengkap dengan validasi dasar dibuat secara otomatis dari skema Anda.
 - ✅ **Siap Uji:** Kerangka Unit Test dengan Jest ikut dihasilkan untuk setiap endpoint.
 - 📦 **TypeScript Ready:** Proyek modern dengan type-safety penuh untuk pengembangan yang lebih aman.
+- 🚀 **Dukungan ORM/ODM** : Dukungan untuk menggunakan Sequelize sebagai ORM atau Mongoose sebagai ODM.
 
 ---
 
 ## Prasyarat
 Pastikan perangkat Anda telah terinstal:
-- [Node.js](https://nodejs.org/) (versi 18.x atau lebih tinggi)
-- [Yeoman](https://yeoman.io/): `npm install -g yo`
+1. [Node.js](https://nodejs.org/) (versi 22.x atau lebih tinggi)
+2. [Yeoman](https://yeoman.io/): `npm install -g yo`
+
+*Jika belum terinstall, maka wajib untuk menginstall keduanya
 
 ---
 
-## Instalasi Lokal
+## Instalasi Generator (Lokal)
 ```bash
 npm install generator-express-ts-antistress
 ````
 ---
-## Instalasi Global
+## Instalasi Generator (Global)
 ```bash
 npm install -g generator-express-ts-antistress
 ````
@@ -53,19 +56,32 @@ npm install -g generator-express-ts-antistress
 
 ## Cara Penggunaan
 
-1.  Buat sebuah file skema, misalnya `schema.json`, yang mendefinisikan model data Anda.
-2.  Buka terminal di direktori pilihan Anda, lalu jalankan generator dengan perintah:
-   
+1. Buat direktori baru untuk proyek Anda.
+2. Buat sebuah file skema, misalnya `schema.json`, yang mendefinisikan model data Anda.
+3. Buka terminal di direktori pilihan Anda, lalu jalankan generator dengan perintah:
+
     ```bash
     yo express-ts-antistress
     ```
-3.  Jawab pertanyaan yang muncul di terminal:
+4.  Jawab pertanyaan yang muncul di terminal:
       - **Nama proyek?** (contoh: `my-awesome-api`)
       - **Pilih arsitektur (MVC/Layered)?**
       - **Pilih database?** (MySQL/PostgreSQL/MongoDB/SQLite)
       - **Masukkan path file skema JSON:** (contoh: `schema.json`)
+          - Jika file schema.json berada di direktori utama proyek (root), cukup masukkan: schema.json.
+          - Jika berada dalam subfolder, masukkan path relatifnya, misalnya: configs/schema.json.
 
-Generator akan membuat direktori proyek baru dan menghasilkan semua file yang diperlukan.
+    Generator akan membuat direktori proyek baru dan menghasilkan semua file yang diperlukan.
+5. Untuk menjalankan projek output, jangan lupa untuk pindah ke direktori projek output. Misal projek output bernama `my-awesome-api`, maka jalankan perintah:
+    ```bash
+      cd my-awesome-api
+    ```
+  
+    setelah itu jalankan perintah:
+    ```bash
+      npm run dev
+    ```
+
 
 -----
 
@@ -84,7 +100,9 @@ File skema harus memiliki properti root `models` yang berisi sebuah array dari o
 | `fields` | `object` | Ya | Objek yang berisi definisi semua field untuk model ini. |
 | `relations`| `object` | Tidak | Objek yang berisi definisi relasi ke model lain. |
 
-```
+Contoh Penulisan:
+
+```json
 {
 
   "models":[
@@ -93,7 +111,7 @@ File skema harus memiliki properti root `models` yang berisi sebuah array dari o
       "fields" : { // wajib
         "field1" : {"type": "tipe-data"} 
       },
-      "relations" : { // opsional
+      "relations" : { // opsional, jika memiliki relasi
         "relations1": {"model": "NamaModelLain", "type": "tipe-relasi"}
       }
 
@@ -109,11 +127,11 @@ Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *va
 
 | Properti | Tipe | Deskripsi |
 | :--- | :--- | :--- |
-| `type` | `string` | **Wajib.** Tipe data untuk field. Lihat daftar tipe yang didukung di bawah. |
-| `primaryKey`| `boolean`| Menandakan sebagai primary key. |
-| `autoIncrement`|`boolean`| Mengaktifkan auto-increment (biasanya untuk primary key). |
-| `required` | `boolean`| Field ini tidak boleh kosong. |
-| `unique` | `boolean`| Nilai field ini harus unik di dalam tabel. |
+| `type` | `string` | **Wajib.** Berisi tipe data untuk field. Lihat daftar tipe yang didukung di bawah. |
+| `primaryKey`| `boolean`| Menandakan sebagai primary key. (true / false) |
+| `autoIncrement`|`boolean`| Mengaktifkan auto-increment (true / false). |
+| `required` | `boolean`| Untuk field ini tidak boleh kosong. (true / false) |
+| `unique` | `boolean`| Nilai field ini harus unik di dalam tabel. (true / false)|
 | `default` | `any` | Nilai default jika tidak ada nilai yang diberikan. |
 | `enum` | `array` | Daftar nilai yang diizinkan untuk field bertipe string/enum. |
 | `foreignKey`| `boolean`| Menandakan field ini sebagai foreign key. **Wajib ada** pada field yang menjadi dasar relasi `belongsTo` (format: `ModelNameId`, contoh: userId). |
@@ -123,6 +141,42 @@ Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *va
 
 **Tipe Data yang bisa digunakan untuk `type`:**
 `string`, `text`, `integer`, `float`, `double`, `decimal`, `bigint`, `boolean`, `date`, `datetime`, `timestamp`, `time`, `uuid`, `varchar`, `char`, `smallint`, `mediumint`, `tinyint`, `json`, `object`, `array`, `blob`, `binary`, `enum`, `objectId`.
+
+Contoh:
+
+```json
+{
+
+  "models":[
+    {
+      "name" : "User", // wajib
+      "fields" : { // wajib
+        "id" : {"type": "integer", }, // "type" wajib ada, misal {"type": "integer"}
+        "email" : {"type": "string", "unique": true}, // unique dan lainnya opsional
+        "password" : {"type": "string", "required": true},
+      },
+      "relations" : { // opsional, jika memiliki relasi.
+        "posts": {"model": "Post", "type": "hasMany"} 
+      }
+
+    },
+    {
+      "name" : "Post", // wajib
+      "fields" : { // wajib
+        "id" : {"type": "integer", },
+        "title" : {"type": "string", "required": true, "unique": true},
+        "content" : {"type": "text"},
+        "userId" : { // contoh penulisan foreignKey
+          "type": "integer",
+          "foreignKey": true,
+          "references": "User.id",
+          "onDelete": "CASCADE"
+        },
+      },
+    }
+  ]
+}
+```
 
 
 ### Properti Relation
@@ -141,27 +195,86 @@ Berikut adalah penjelasan untuk setiap type relasi yang dapat Anda gunakan:
 
 1. hasOne (Satu ke Satu)
 Menjelaskan bahwa satu baris data di model ini terhubung dengan tepat satu baris data di model lain.
-- Contoh: Satu User memiliki satu Profile.
-- Struktur Kunci: Foreign key biasanya berada di model target (tabel profiles memiliki user_id).
+    - Struktur Kunci: Foreign key biasanya berada di model target (tabel profiles memiliki userId).
+    - Contoh: Satu User memiliki satu Profile.
+
+    ```json
+    {
+      "name": "User",
+      "fields": {
+       ...
+      },
+      "relations": {
+        "profile": { "type": "hasOne", "model": "Profile", "cascadeDelete": true }
+      }
+    }
+    ```
 
 2. hasMany (Satu ke Banyak)
 Menjelaskan bahwa satu baris data di model ini terhubung dengan banyak baris data di model lain.
-- Contoh: Satu User memiliki banyak Post.
-- Struktur Kunci: Foreign key berada di model target (tabel posts memiliki userId).
+    
+    - Struktur Kunci: Foreign key berada di model target (tabel posts memiliki userId).
+    - Contoh: Satu User memiliki banyak Post.
+    
+    ```json
+    {
+      "name": "User",
+      "fields": {
+       ...
+      },
+      "relations": {
+        "posts": {"type": "hasMany", "model": "Post", "cascadeDelete": true}, //cascadeDelete opsional
+      }
+    },
+    ```
 
 3. belongsTo (Dimiliki Oleh)
 Ini adalah kebalikan dari relasi hasOne atau hasMany. Relasi ini menyatakan bahwa model ini "milik" satu baris data di model lain.
-- Contoh: Satu Post dimiliki oleh (belongsTo) satu User.
-- Struktur Kunci: Foreign key berada di model ini (tabel posts harus memiliki field userId).
+    - Struktur Kunci: Foreign key berada di model ini (tabel posts harus memiliki field userId).
+    - Contoh: Satu Comment dimiliki oleh (belongsTo) satu User.
+    
+    ```json
+    {
+      "name" : "Comment",
+      "fields": {
+        ....
+        "userId": {                   // wajib ada foreignKey di model ini
+          "type": "integer",
+          "foreignKey": true,         // wajib true
+          "references": "User.id",    // wajib ada. Penulisan harus dengan format : `Model.id`
+          "onDelete": "SET NULL"
+        }
+      },
+      "relations": {
+        "user": { "type": "belongsTo", "model": "User" }
+      }
+    }
+    ```
+
 
 4. manyToMany (Banyak ke Banyak)
 Hubungan kompleks di mana banyak baris data di model ini bisa terhubung dengan banyak baris data di model lain.
-- Contoh: Satu Post bisa memiliki banyak Tag, dan satu Tag bisa digunakan di banyak Post.
-- Struktur Kunci: Relasi ini wajib menggunakan tabel perantara (junction/pivot table) untuk menyimpan pasangannya. Nama model tabel perantara ini didefinisikan di properti through.
+    - Struktur Kunci: Relasi ini wajib menggunakan tabel perantara (junction/pivot table) untuk menyimpan pasangannya. Nama model tabel perantara ini didefinisikan di properti through.
+    - Contoh: Satu Post bisa memiliki banyak Tag, dan satu Tag bisa digunakan di banyak Post. Maka untuk menghubungkan Post dan Tag, kita perlu membuat model perantara (postTags)
+    
+    ```json
+    {
+      "name": "Post",
+      "fields": {
+        ....
+      },
+      "relations": {
+        "tags": { "type": "manyToMany", "model": "Tag", "through": "PostTags" }
+      }
+    }
+    ```
+
 
 ### Contoh Lengkap
 
-contoh schema.json
+  ![Diagram Class Model](erd.png)
+
+Contoh schema.json
 
 ```json
 {
@@ -287,25 +400,59 @@ my-app2/
 
 -----
 
-## Perintah yang Tersedia
+## Penggunaan API
+ 
+Proyek yang dibuat berisi kode operasi CRUD lengkap dengan operasi di database. Selain itu, juga dibuatkan file test untuk menguji setiap endpoint Model. Setelah proyek dibuat, berikut langkah-langkah yang perlu dilakukan.
 
-Setelah proyek dibuat, masuk ke direktori proyek dan jalankan:
-
-  - **Instalasi dependensi:**
+1. **Masuk ke direktori proyek:**
+    Masuk ke direktori proyek dengan mengetikkan cd nama-projek di terminal. Misal:
+    
     ```bash
-    npm install
+    cd myapp
     ```
-  - **Menjalankan server pengembangan (dengan auto-reload):**
+2. **Jalankan Local Server:**
+    Jalankan server lokal dengan menjalankan XAMPP, Laragon, atau yang lainnya. 
+
+3. **Buat Database:**
+    Jika proyek menggunakan database sql (MySQL, SQLite, PostgreSQL), maka wajib membuat database dengan nama yang sesuai DB_NAME di file .env. DB_NAME pada file tersebut bisa dirubah sesuai keinginan.
+
+4. **Menjalankan server pengembangan (dengan auto-reload dengn nodemon):**
+    Setelah setup database berhasil, API siap dijalankan dengan perintah:
+
     ```bash
     npm run dev
     ```
-  - **Menjalankan server produksi:**
-    ```bash
-    npm start
-    ```
-  - **Menjalankan pengujian:**
-    ```bash
-    npm test
-    ```
+
+  Selain itu terdapat perintah lain yang dapat dijalankan:
+
+  a. **Menjalankan server produksi:**
+```bash
+npm start
+```
+  
+  b **Menjalankan pengujian:**
+```bash
+npm test
+```
+  
+  c. **Compile Projek ke JS**
+```bash
+npm run build
+```
+  
+  d. **Menjalankan format ESLint**
+```bash
+npm run lint
+```
+  
+  e. **Menjalankan format Prettier**
+```bash
+npm run prettier
+```
+  
+  f. **Menjalankan format ESLint dan Prettoer bersaman**
+```bash
+npm run format
+```
 
 -----

@@ -7,7 +7,7 @@ exports.TestGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
-const crypto_1 = require("crypto");
+const chalk_1 = __importDefault(require("chalk"));
 class TestGenerator {
     constructor(outputPath, models, dbType, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -72,6 +72,8 @@ class TestGenerator {
             // Generate testFactory.ts
             const factoryContent = ejs_1.default.render(fs_1.default.readFileSync(factoryTemplatePath, "utf-8"), {
                 models: sortedModels,
+                toQuotedExpressionLiteral: this.toQuotedExpressionLiteral,
+                toExpressionLiteral: this.toExpressionLiteral,
                 objectToFieldArray: this.objectToFieldArray,
                 generateExamplePayload: this.generateExamplePayload,
                 toJsLiteral: this.toJsLiteral,
@@ -110,15 +112,17 @@ class TestGenerator {
                     finalExampleUpdatePayload,
                     foreignKeys,
                     foreignKeyNames,
+                    toQuotedExpressionLiteral: this.toQuotedExpressionLiteral,
                     toJsLiteralWithForeignKeys: this.toJsLiteralWithForeignKeys,
                     toJsLiteral: this.toJsLiteral,
                     toCamelCase: this.toCamelCase
                 });
                 fs_1.default.writeFileSync(filePath, rendered);
+                console.log(chalk_1.default.green("✅ Test file created successfully:", filePath));
             });
         }
         catch (error) {
-            console.error("Error generating tests:", error.message);
+            console.error(chalk_1.default.red("Error generating tests:", error.message));
             throw error;
         }
     }
@@ -195,55 +199,224 @@ class TestGenerator {
     }
     // Nilai mock sesuai tipe
     getMockValue(field, isUpdate = false) {
+        const random = Math.floor(Math.random() * 100000);
         if (typeof field === "object" && field !== null) {
             if (Array.isArray(field.enum)) {
-                return field.enum[Math.floor(Math.random() * field.enum.length)];
+                return `faker.helpers.arrayElement(${JSON.stringify(field.enum)})`;
             }
             if (!isUpdate && field.default !== undefined) {
-                return field.default;
+                return JSON.stringify(field.default);
             }
-            field = field.type; // Extract actual type
+            field = field.type;
         }
         switch (field) {
             case "string":
             case "varchar":
             case "char":
-                return isUpdate ? `updated_${this.generateRandomString()}` : "`test_${random}`";
+                return isUpdate
+                    ? `\`updated_\${faker.lorem.word()}_${random}\``
+                    : `faker.lorem.words(2)`;
             case "text":
-                return isUpdate ? `updated_text_${this.generateRandomString()}` : "`test_text_${random}`";
-            // Numeric types
+                return isUpdate
+                    ? `\`updated_text_\${faker.lorem.sentence()}\``
+                    : `faker.lorem.paragraph()`;
             case "number":
             case "int":
             case "integer":
             case "smallint":
             case "mediumint":
             case "tinyint":
-                return this.generateRandomInteger(1, 100);
+                return `faker.number.int({ min: 1, max: 100 })`;
             case "float":
             case "double":
             case "decimal":
-                return this.generateRandomDecimal(1, 100, 2);
+                return `faker.number.float({ min: 10, max: 100, fractionDigits: 3 })`;
             case "bigint":
-                return Number(this.generateRandomInteger(1000000000, 9999999999));
+                return `faker.number.int({ min: 1000000000, max: 9999999999 })`;
             case "boolean":
-                return Math.random() > 0.5;
+                return `faker.datatype.boolean()`;
             case "date":
             case "datetime":
             case "timestamp":
-                return new Date().toISOString();
+                return `faker.date.recent().toISOString()`;
             case "uuid":
-                return (0, crypto_1.randomUUID)();
+                return `faker.string.uuid()`;
             case "json":
             case "object":
-                return { key: isUpdate ? "updated_value" : "test_value" };
+                return isUpdate
+                    ? `{ key: "updated_value" }`
+                    : `{ key: "test_value" }`;
             case "array":
-                return [this.generateRandomInteger(), this.generateRandomInteger()];
+                return `[faker.number.int(), faker.number.int()]`;
             case "blob":
             case "binary":
-                return Buffer.from(isUpdate ? "updated" : "test");
+                return `Buffer.from("${isUpdate ? "updated_binary" : "test_binary"}")`;
             default:
-                return isUpdate ? `updated_value_${this.generateRandomString()}` : `default_${this.generateRandomString()}`;
+                return isUpdate
+                    ? `\`updated_value_\${faker.string.alpha(5)}\``
+                    : `\`default_\${faker.string.alpha(5)}\``;
         }
+    }
+    // private getMockValue(field: any, isUpdate = false): any {
+    //   const random = Math.floor(Math.random() * 100000);
+    //   if (typeof field === "object" && field !== null) {
+    //     if (Array.isArray(field.enum)) {
+    //       return faker.helpers.arrayElement(field.enum);
+    //     }
+    //     if (!isUpdate && field.default !== undefined) {
+    //       return field.default;
+    //     }
+    //     // Gunakan field.type untuk switch
+    //     field = field.type;
+    //   }
+    //   switch (field) {
+    //     // String types
+    //     case "string":
+    //     case "varchar":
+    //     case "char":
+    //       return isUpdate
+    //         ? `updated_${faker.lorem.word()}_${random}`
+    //         : faker.lorem.words(2);
+    //     case "text":
+    //       return isUpdate
+    //         ? `updated_text_${faker.lorem.sentence()}`
+    //         : faker.lorem.paragraph();
+    //     // Numeric types
+    //     case "number":
+    //     case "int":
+    //     case "integer":
+    //     case "smallint":
+    //     case "mediumint":
+    //     case "tinyint":
+    //       return faker.number.int({ min: 1, max: 100 });
+    //     case "float":
+    //     case "double":
+    //     case "decimal":
+    //       return faker.number.float({ min: 10, max: 100, fractionDigits: 3 });
+    //     case "bigint":
+    //       return faker.number.int({ min: 1000000000, max: 9999999999 });
+    //     // Boolean
+    //     case "boolean":
+    //       return faker.datatype.boolean();
+    //     // Date and time
+    //     case "date":
+    //     case "datetime":
+    //     case "timestamp":
+    //       return faker.date.recent().toISOString();
+    //     // UUID
+    //     case "uuid":
+    //       return faker.string.uuid();
+    //     // JSON/Object
+    //     case "json":
+    //     case "object":
+    //       return { key: isUpdate ? "updated_value" : "test_value" };
+    //     // Arrays (basic numeric array)
+    //     case "array":
+    //       return [faker.number.int(), faker.number.int()];
+    //     // Binary/blob
+    //     case "blob":
+    //     case "binary":
+    //       return Buffer.from(isUpdate ? "updated_binary" : "test_binary");
+    //     default:
+    //       return isUpdate
+    //         ? `updated_value_${faker.string.alpha(5)}`
+    //         : `default_${faker.string.alpha(5)}`;
+    //   }
+    // }
+    // private getMockValue(field: any, isUpdate = false): any {
+    //   if (typeof field === "object" && field !== null) {
+    //     if (Array.isArray(field.enum)) {
+    //       return field.enum[Math.floor(Math.random() * field.enum.length)];
+    //     }
+    //     if (!isUpdate && field.default !== undefined) {
+    //       return field.default;
+    //     }
+    //     field = field.type; // Extract actual type
+    //   }
+    //   switch (field) {
+    //     case "string":
+    //     case "varchar":
+    //     case "char":
+    //       return isUpdate ? `updated_${this.generateRandomString()}` : "`test_${random}`";
+    //     case "text":
+    //       return isUpdate ? `updated_text_${this.generateRandomString()}` : "`test_text_${random}`";
+    //     // Numeric types
+    //     case "number":
+    //     case "int":
+    //     case "integer":
+    //     case "smallint":
+    //     case "mediumint":
+    //     case "tinyint":
+    //       return this.generateRandomInteger(1, 100);
+    //     case "float":
+    //     case "double":
+    //     case "decimal":
+    //       return this.generateRandomDecimal(1, 100, 2);
+    //     case "bigint":
+    //       return Number(this.generateRandomInteger(1000000000, 9999999999));
+    //     case "boolean":
+    //       return Math.random() > 0.5;
+    //     case "date":
+    //     case "datetime":
+    //     case "timestamp":
+    //       return new Date().toISOString();
+    //     case "uuid":
+    //       return isUpdate
+    //         ? "550e8400-e29b-41d4-a716-446655440001"
+    //         : "550e8400-e29b-41d4-a716-446655440000";
+    //     case "json":
+    //     case "object":
+    //       return { key: isUpdate ? "updated_value" : "test_value" };
+    //     case "array":
+    //       return [this.generateRandomInteger(), this.generateRandomInteger()];
+    //     case "blob":
+    //     case "binary":
+    //       return Buffer.from(isUpdate ? "updated" : "test");
+    //     default:
+    //       return isUpdate ? `updated_value_${this.generateRandomString()}` : `default_${this.generateRandomString()}`;
+    //   }
+    // }
+    // private toQuotedExpressionLiteral(obj: Record<string, any>, indent = 2): string {
+    //   const indentStr = " ".repeat(indent);
+    //   const entries = Object.entries(obj).map(([key, value]) => {
+    //     const isJsExpression =
+    //       typeof value === "string" && /^faker\.|^Buffer\.|^new |^\[|\{/.test(value);
+    //     const renderedValue = isJsExpression ? value : JSON.stringify(value);
+    //     return `${indentStr}"${key}": ${renderedValue}`;
+    //   });
+    //   return `{\n${entries.join(",\n")}\n}`;
+    // }
+    toQuotedExpressionLiteral(obj, indent = 2) {
+        const indentStr = " ".repeat(indent);
+        const renderValue = (value) => {
+            if (typeof value === "object" &&
+                value !== null &&
+                "__foreignModel" in value &&
+                "__foreignKeyName" in value) {
+                // Foreign key case → return key as variable
+                return value.__foreignKeyName;
+            }
+            if (typeof value === "object" && value !== null) {
+                return this.toQuotedExpressionLiteral(value, indent + 2); // recursion
+            }
+            const isJsExpression = typeof value === "string" &&
+                (/^faker\.|^Buffer\.|^new |^\[|\{/.test(value));
+            return isJsExpression ? value : JSON.stringify(value);
+        };
+        const entries = Object.entries(obj).map(([key, value]) => {
+            return `${indentStr}"${key}": ${renderValue(value)}`;
+        });
+        return `{\n${entries.join(",\n")}\n${" ".repeat(indent - 2)}}`;
+    }
+    toExpressionLiteral(obj, indent = 2) {
+        const indentStr = " ".repeat(indent);
+        const entries = Object.entries(obj).map(([key, value]) => {
+            // Jika value string dan terlihat seperti ekspresi (misal: "faker.string.uuid()"), jangan beri quote
+            const isJsExpression = typeof value === "string" && /^faker\.|^Buffer\.|^new |^\[|\{/.test(value);
+            const renderedValue = isJsExpression ? value : JSON.stringify(value);
+            return `${indentStr}${key}: ${renderedValue}`;
+        });
+        return `{\n${entries.join(",\n")}\n}`;
     }
     toJsLiteralWithForeignKeys(obj, foreignKeys) {
         return ("{\n" +

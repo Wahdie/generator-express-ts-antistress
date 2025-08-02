@@ -7,6 +7,7 @@ exports.ServiceGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class ServiceGenerator {
     constructor(outputPath, dbType, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -24,10 +25,10 @@ class ServiceGenerator {
             const templatePath = path_1.default.resolve(this.fileTemplatePath, templateFile);
             const content = await ejs_1.default.render(fs_1.default.readFileSync(templatePath, 'utf-8'), { model, dbType: this.dbType, toCamelCase: this.toCamelCase });
             fs_1.default.writeFileSync(filePath, content, 'utf-8');
-            console.log(`✅ Service created for model: ${model.name}`);
+            console.log(chalk_1.default.green(`✅ Service created for model: ${model.name}`));
         }
         catch (error) {
-            console.error(`❌ Error generating service for model ${model.name}:`, error);
+            console.error(chalk_1.default.red(`❌ Error generating service for model ${model.name}:`, error));
             throw error;
         }
     }

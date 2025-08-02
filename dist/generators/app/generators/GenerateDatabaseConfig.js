@@ -7,6 +7,7 @@ exports.DatabaseConfigGenerator = void 0;
 const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class DatabaseConfigGenerator {
     constructor(outputPath, dbType, dbDialect, fileTemplatePath) {
         this.dbType = 'sql';
@@ -43,16 +44,16 @@ class DatabaseConfigGenerator {
                 promises_1.default.writeFile(configPath, rendered.trim()),
                 promises_1.default.writeFile(envPath, renderedEnv.trim())
             ]);
-            console.log(`✅ Database config generated: ${configPath}`);
-            console.log(`✅ .env file generated: ${envPath}`);
+            console.log(chalk_1.default.green(`✅ Database config generated: ${configPath}`));
+            console.log(chalk_1.default.green(`✅ .env file generated: ${envPath}`));
         }
         catch (error) {
-            throw new Error(`Failed to generate config: ${error.message}`);
+            throw new Error(chalk_1.default.red(`Failed to generate config: ${error.message}`));
         }
     }
     validateDatabaseType() {
         if (!['sql', 'nosql'].includes(this.database.type)) {
-            throw new Error(`Unsupported database type: ${this.database.type}`);
+            throw new Error(chalk_1.default.red(`Unsupported database type: ${this.database.type}`));
         }
     }
     setDefaultValues() {
@@ -74,7 +75,7 @@ class DatabaseConfigGenerator {
                 this.database.port = 27017;
                 break;
             default:
-                throw new Error(`Unsupported dialect: ${this.database.dialect}`);
+                throw new Error(chalk_1.default.red(`Unsupported dialect: ${this.database.dialect}`));
         }
     }
     getEnvConfig() {

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DependencyInstaller = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const chalk_1 = __importDefault(require("chalk"));
 const child_process_1 = require("child_process");
 class DependencyInstaller {
     constructor(outputPath, dbDialect) {
@@ -23,7 +24,7 @@ class DependencyInstaller {
                 'express', 'dotenv', 'cors', 'body-parser', 'morgan', 'winston'
             ];
             const devDependencies = [
-                'typescript', 'ts-node', '@types/node', '@types/express',
+                'typescript', 'ts-node', '@types/node', '@types/express', '@faker-js/faker',
                 'nodemon', 'eslint', 'prettier', '@types/morgan', '@eslint/js', 'globals', 'typescript-eslint', 'jest', 'ts-jest', '@types/jest', 'supertest', '@types/supertest'
             ];
             // Add ORM dependencies based on the selected database dialect
@@ -43,7 +44,7 @@ class DependencyInstaller {
             this.configurePackageJson();
         }
         catch (error) {
-            console.error("Error configuring dependencies:", error.message);
+            console.error(chalk_1.default.red("Error configuring dependencies:", error.message));
             throw error;
         }
     }
@@ -69,7 +70,7 @@ class DependencyInstaller {
             }
         }
         catch (error) {
-            console.error("Error installing dependencies:", error.message);
+            console.error(chalk_1.default.red("Error installing dependencies:", error.message));
             throw error;
         }
     }
@@ -89,10 +90,10 @@ class DependencyInstaller {
                 test: "npx jest --detectOpenHandles"
             };
             fs_1.default.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-            console.log("package.json configured successfully.");
+            console.log(chalk_1.default.green("package.json configured successfully."));
         }
         catch (error) {
-            console.error("Error configuring package.json:", error.message);
+            console.error(chalk_1.default.red("Error configuring package.json:", error.message));
             throw error; // Rethrow the error to be handled by the caller
         }
     }

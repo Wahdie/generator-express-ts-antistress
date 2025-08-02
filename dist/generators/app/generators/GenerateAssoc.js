@@ -1,31 +1,13 @@
 "use strict";
-// import { promises as fs } from 'fs';
-// import path from 'path';
-// import ejs from 'ejs';
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssociationFileGenerator = void 0;
-// export class AssociationFileGenerator {
-//   constructor(private outputPath: string, private models: any[], private fileTemplatePath: string) {}
-//   async generate(): Promise<void> {
-//     try {
-//       const templatePath = path.join(this.fileTemplatePath, 'model/sequelize', 'association.ejs');
-//       const targetPath = path.join(this.outputPath, 'src/models', 'associations.ts');
-//       const template = await fs.readFile(templatePath, 'utf-8');
-//       const rendered = ejs.render(template, { models: this.models });
-//       await fs.mkdir(path.dirname(targetPath), { recursive: true });
-//       await fs.writeFile(targetPath, rendered);
-//     } catch (error) {
-//       console.error('Failed to generate association file:', error);
-//       throw error;
-//     }
-//   }
-// }
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class AssociationFileGenerator {
     constructor(outputPath, models, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -72,9 +54,10 @@ class AssociationFileGenerator {
             const rendered = ejs_1.default.render(template, { models: this.models });
             await fs_1.promises.mkdir(path_1.default.dirname(targetPath), { recursive: true });
             await fs_1.promises.writeFile(targetPath, rendered);
+            console.log(chalk_1.default.green(`✅ Association file generated: ${targetPath}`));
         }
         catch (error) {
-            console.error('Failed to generate association file:', error);
+            console.error(chalk_1.default.red('Failed to generate association file:', error));
             throw error;
         }
     }

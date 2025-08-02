@@ -7,6 +7,7 @@ exports.ModelGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class ModelGenerator {
     constructor(outputPath, fileTemplatePath) {
         // Type mapping utils
@@ -90,11 +91,11 @@ class ModelGenerator {
             });
             const modelPath = path_1.default.join(modelDir, `${model.name}.ts`);
             fs_1.default.writeFileSync(modelPath, content.trim());
-            console.log(`✅ Sequelize model created: ${modelPath}`);
+            console.log(chalk_1.default.green(`✅ Sequelize model created: ${modelPath}`));
             return { success: true, modelPath };
         }
         catch (error) {
-            console.error(`❌ Sequelize model error:`, error.message);
+            console.error(chalk_1.default.red(`❌ Sequelize model error:`, error.message));
             return { success: false, error: error.message, stack: error.stack };
         }
     }
@@ -113,11 +114,11 @@ class ModelGenerator {
             });
             const modelPath = path_1.default.join(modelDir, `${model.name}.ts`);
             fs_1.default.writeFileSync(modelPath, content.trim());
-            console.log(`✅ Mongoose model created: ${modelPath}`);
+            console.log(chalk_1.default.green(`✅ Mongoose model created: ${modelPath}`));
             return { success: true, modelPath };
         }
         catch (error) {
-            console.error(`❌ Mongoose model error:`, error.message);
+            console.error(chalk_1.default.red(`❌ Mongoose model error:`, error.message));
             return { success: false, error: error.message, stack: error.stack };
         }
     }

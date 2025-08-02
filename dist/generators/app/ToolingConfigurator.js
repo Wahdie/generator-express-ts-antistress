@@ -7,6 +7,7 @@ exports.ToolingConfigurator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class ToolingConfigurator {
     constructor(outputPath, templatePath, dbType) {
         this.outputPath = outputPath;
@@ -33,7 +34,7 @@ class ToolingConfigurator {
             });
         }
         catch (error) {
-            console.error("Error setting up tooling:", error);
+            console.error(chalk_1.default.red("Error setting up tooling:", error));
             throw error;
         }
     }

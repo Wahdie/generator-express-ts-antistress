@@ -2,17 +2,38 @@
   "models": [
     {
       "name": "User",
-      "fields": {
+      "field": {
         "name": { "type": "string" }
       },
       "relations": {
-        "posts": { "type": "hasMany" } 
+        "posts": { "type": "hasMany" }
       }
     },
     {
-      "name": "Post",
+      "nama": "Post",
       "fields": {
-        "title": { "type": "string" }
+        "title": { "type": "string" },
+        "content": { "required": true, "type": "string" }
+      }
+    },
+    {
+      "nama": "Post",
+      "fields": {
+        "title": { "type": "string" },
+        "content": { "required": true, "type": "string" }
+      },
+      "relations": {
+        "author": { "type": "belongsTo", "model": "User" }
+      }
+    },
+    {
+      "name": "Comment",
+      "fields": {
+        "text": { "type": "string" },
+        "postId": { "type": "integer", "required": true }
+      },
+      "relations": {
+        "post": { "model": "Post" }
       }
     }
   ]

@@ -7,15 +7,15 @@ exports.SchemaValidator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ajv_1 = __importDefault(require("ajv"));
-// Anda perlu membuat file ini. Contohnya ada di bawah kode.
 const projectSchema_1 = __importDefault(require("./utils/projectSchema"));
+const chalk_1 = __importDefault(require("chalk"));
 class SchemaValidator {
     constructor(schemaPath) {
         this.schemaPath = schemaPath;
     }
     getParsedSchema() {
         if (!this.parsedSchema) {
-            throw new Error("Skema belum divalidasi atau di-parse. Panggil validate() terlebih dahulu.");
+            throw new Error(chalk_1.default.red.bold("Skema belum divalidasi atau di-parse. Panggil validate() terlebih dahulu."));
         }
         return this.parsedSchema;
     }
@@ -23,7 +23,7 @@ class SchemaValidator {
         try {
             const fullPath = path_1.default.resolve(this.schemaPath);
             if (!fs_1.default.existsSync(fullPath)) {
-                throw new Error(`File skema tidak ditemukan: ${fullPath}`);
+                throw new Error(chalk_1.default.red.bold(`File skema tidak ditemukan: ${fullPath}`));
             }
             const rawSchemaData = fs_1.default.readFileSync(fullPath, 'utf-8');
             const jsonData = JSON.parse(rawSchemaData);
@@ -32,27 +32,26 @@ class SchemaValidator {
             const validate = ajv.compile(projectSchema_1.default);
             const valid = validate(jsonData);
             if (!valid) {
-                console.error('❌ Validasi skema dasar gagal:');
+                console.error(chalk_1.default.red.bold('❌ Basic schema validation failed:'));
                 validate.errors?.forEach(err => {
-                    console.error(`- Path: ${err.instancePath}, Pesan: ${err.message}`);
+                    console.error(chalk_1.default.yellow(`- Path: ${err.instancePath}, Message: ${err.message}`));
                 });
-                throw new Error('Struktur dasar skema JSON Anda tidak valid. Silakan periksa kembali.');
+                throw new Error(chalk_1.default.red.bold('The structure of your JSON schema is invalid. Please check again.'));
             }
             this.parsedSchema = jsonData;
-            console.log('✅ Validasi struktur dasar skema berhasil.');
+            console.log(chalk_1.default.green('✅ Basic schema structure validation successful.'));
             // --- Validasi Logika Relasi (Custom) ---
             this.validateRelationsAndReferences();
-            console.log('✅ Validasi logika relasi dan referensi berhasil.');
+            console.log(chalk_1.default.green('✅ Relational logic and references validation successful.'));
         }
         catch (error) {
-            // Melempar kembali error untuk ditangani oleh pemanggil
             throw error;
         }
     }
     validateRelationsAndReferences() {
         const schema = this.getParsedSchema();
         if (!schema.models || !Array.isArray(schema.models)) {
-            throw new Error("Skema tidak valid: 'models' harus ada dan berupa array.");
+            throw new Error(chalk_1.default.red.bold("Invalid schema: 'models' must exist and be an array."));
         }
         const modelNames = new Set(schema.models.map(model => model.name));
         const modelFieldMap = new Map();
@@ -62,54 +61,37 @@ class SchemaValidator {
         for (const model of schema.models) {
             const pascalCaseRegex = /^[A-Z][a-zA-Z0-9]*$/;
             if (!pascalCaseRegex.test(model.name)) {
-                throw new Error(`Error: Nama model '${model.name}' harus dalam format PascalCase.`);
+                throw new Error(chalk_1.default.red.bold(`Error: The model name '${model.name}' must be in PascalCase format.`));
             }
             for (const [fieldName, field] of Object.entries(model.fields)) {
                 if (field.references) {
                     const parts = field.references.split('.');
                     if (parts.length !== 2) {
-                        throw new Error(`Error di model '${model.name}', field '${fieldName}': Format 'references' harus "Model.field", tetapi hanya ditulis "${field.references}".`);
+                        throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}', field '${fieldName}': The format 'references' must be 'ModelName.fieldPrimaryKey', but it is only written as '${field.references}'.`));
                     }
                     const [referencedModelName, referencedFieldName] = parts;
                     if (!modelNames.has(referencedModelName)) {
-                        throw new Error(`Error di model '${model.name}', field '${fieldName}': Model referensi '${referencedModelName}' tidak ditemukan dalam skema.`);
+                        throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}', field '${fieldName}': Reference model '${referencedModelName}' not found in the schema.`));
                     }
                     const referencedFields = modelFieldMap.get(referencedModelName);
                     if (!referencedFields || !referencedFields.has(referencedFieldName)) {
-                        throw new Error(`Error di model '${model.name}', field '${fieldName}': Field referensi '${referencedFieldName}' tidak ditemukan di model '${referencedModelName}'.`);
+                        throw new Error(chalk_1.default.red.bold(`Error in the model '${model.name}', field '${fieldName}': Reference field '${referencedFieldName}' not found in model '${referencedModelName}'.`));
                     }
                 }
             }
             if (model.relations) {
                 for (const [relName, rel] of Object.entries(model.relations)) {
                     if (!modelNames.has(rel.model)) {
-                        throw new Error(`Error di model '${model.name}': Relasi '${relName}' merujuk ke model '${rel.model}' yang tidak terdefinisi.`);
+                        throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}': Relation '${relName}' refers to an undefined model '${rel.model}'.`));
                     }
                     if (rel.type === "manyToMany") {
                         if (!rel.through) {
-                            throw new Error(`Error di model '${model.name}': Relasi many-to-many '${relName}' harus memiliki properti 'through'.`);
+                            throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}': The many-to-many relationship '${relName}' must have a 'through' property.`));
                         }
                         if (!modelNames.has(rel.through)) {
-                            throw new Error(`Error di model '${model.name}': Properti 'through' pada relasi '${relName}' merujuk ke model pivot '${rel.through}' yang tidak terdefinisi.`);
+                            throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}': The 'through' property on the relationship '${relName}' refers to the undefined pivot model '${rel.through}'.`));
                         }
                     }
-                    // --- VALIDASI BARU: Memastikan foreign key ada untuk relasi belongsTo ---
-                    // if (rel.type === 'belongsTo') {
-                    //   // const expectedFkFieldName = `${relName}Id`; // e.g., 'user' relation expects 'userId' field
-                    //   const expectedFkFieldName = `${rel.model.toLocaleLowerCase()}Id`; // e.g., 'user' relation expects 'userId' field
-                    //   const expectedFkFieldName2 = `${relName}Id`;
-                    //   const fkField = model.fields[expectedFkFieldName] || model.fields[expectedFkFieldName2];
-                    //   if (!fkField) {
-                    //     throw new Error(
-                    //       `Error di model '${model.name}': Relasi 'belongsTo' bernama '${relName}' tidak memiliki foreign key. Diharapkan ada field bernama '${expectedFkFieldName}'.`
-                    //     );
-                    //   }
-                    //   if (!fkField.foreignKey) {
-                    //     throw new Error(
-                    //       `Error di model '${model.name}': Field '${expectedFkFieldName}' yang berhubungan dengan relasi '${relName}' harus memiliki properti "foreignKey": true.`
-                    //     );
-                    //   }
-                    // }
                     if (rel.type === 'belongsTo') {
                         const targetModel = rel.model;
                         let foreignKeyFieldFound = null;
@@ -123,7 +105,7 @@ class SchemaValidator {
                             }
                         }
                         if (!foreignKeyFieldFound) {
-                            throw new Error(`Error di model '${model.name}': Relasi 'belongsTo' bernama '${relName}' mengarah ke model '${rel.model}', tetapi tidak ditemukan field manapun dengan 'foreignKey: true' dan 'references' mengarah ke '${rel.model}'.`);
+                            throw new Error(chalk_1.default.red.bold(`Error in model '${model.name}': The 'belongsTo' relation named '${relName}' points to '${rel.model}', but a corresponding field with 'foreignKey: true' and a valid 'references' property was not found.`));
                         }
                     }
                 }

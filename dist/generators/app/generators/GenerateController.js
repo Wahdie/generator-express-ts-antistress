@@ -7,6 +7,7 @@ exports.ControllerGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class ControllerGenerator {
     constructor(outputPath, type, pattern, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -23,7 +24,7 @@ class ControllerGenerator {
         else if (this.pattern === 'Layered') {
             return 'layered/controller.ejs';
         }
-        throw new Error('Invalid project structure or type');
+        throw new Error(chalk_1.default.red('Invalid project structure or type'));
     }
     getTemplatePath(model) {
         return path_1.default.join(this.fileTemplatePath, 'controller/', this.getTemplateFileName());
@@ -33,12 +34,12 @@ class ControllerGenerator {
     }
     validate() {
         if (!this.type || (this.type !== 'sql' && this.type !== 'nosql')) {
-            console.error('❌ Invalid schema: type must be either "sql" or "nosql".');
+            console.error(chalk_1.default.red('❌ Invalid schema: type must be either "sql" or "nosql".'));
             return false;
         }
         if (!this.pattern ||
             (this.pattern !== 'MVC' && this.pattern !== 'Layered')) {
-            console.error('❌ Invalid project structure specified. Must be "MVC" or "Layered".');
+            console.error(chalk_1.default.red('❌ Invalid project structure specified. Must be "MVC" or "Layered".'));
             return false;
         }
         return true;
@@ -52,10 +53,10 @@ class ControllerGenerator {
             const controllerContent = await ejs_1.default.renderFile(templatePath, { model: model }, { async: true });
             fs_1.default.mkdirSync(path_1.default.dirname(controllerPath), { recursive: true });
             fs_1.default.writeFileSync(controllerPath, controllerContent.trim());
-            console.log(`✅ Controller file created: ${controllerPath}`);
+            console.log(chalk_1.default.green(`✅ Controller file created: ${controllerPath}`));
         }
         catch (err) {
-            console.error('❌ Error generating controller file:', err);
+            console.error(chalk_1.default.red('❌ Error generating controller file:', err));
         }
     }
 }

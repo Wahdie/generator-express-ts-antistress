@@ -7,6 +7,7 @@ exports.RouterGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class RouterGenerator {
     constructor(outputPath, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -24,10 +25,10 @@ class RouterGenerator {
             const routeContent = await ejs_1.default.renderFile(templatePath, { model: model });
             const routeFilePath = path_1.default.join(routeDir, `${model.name}Router.ts`);
             fs_1.default.writeFileSync(routeFilePath, routeContent.trim(), 'utf-8');
-            console.log(`Route file created: ${routeFilePath} ✅`);
+            console.log(chalk_1.default.green(`✅ Route file created: ${routeFilePath}`));
         }
         catch (error) {
-            console.error(`❌ Error generating router for model ${model.name}:`, error);
+            console.error(chalk_1.default.red(`❌ Error generating router for model ${model.name}:`, error));
             throw error;
         }
     }

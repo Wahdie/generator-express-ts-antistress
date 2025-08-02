@@ -8,6 +8,7 @@ exports.MiddlewareGenerator = void 0;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class MiddlewareGenerator {
     constructor(outputPath, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -22,10 +23,10 @@ class MiddlewareGenerator {
             const targetPath = path_1.default.join(this.outputPath, 'src/middlewares', outputFile);
             await fs_1.promises.mkdir(path_1.default.dirname(targetPath), { recursive: true });
             await fs_1.promises.writeFile(targetPath, content.trim());
-            console.log(`✅ Middleware generated: ${targetPath}`);
+            console.log(chalk_1.default.green(`✅ Middleware generated: ${targetPath}`));
         }
         catch (error) {
-            console.error('❌ Error generating errorHandler middleware:', error);
+            console.error(chalk_1.default.red('❌ Error generating errorHandler middleware:', error));
         }
     }
 }

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const chalk_1 = __importDefault(require("chalk"));
 const GenerateModel_1 = require("./generators/GenerateModel");
 const GenerateDatabaseConfig_1 = require("./generators/GenerateDatabaseConfig");
 const GenerateRepository_1 = require("./generators/GenerateRepository");
@@ -31,15 +32,14 @@ class ProjectGenerator {
     generate() {
         try {
             if (!this.validateSchema()) {
-                throw new Error('Schema validation failed. Please check your schema.');
+                throw new Error(chalk_1.default.red('Schema validation failed. Please check your schema.'));
             }
             this.createStructure();
             this.generateComponents();
             this.generateFinalFiles();
-            console.log('✅ Files generated successfully!');
         }
         catch (error) {
-            console.error('❌ Error generating project:', error);
+            console.error(chalk_1.default.red('❌ Error generating project:', error));
             throw error;
         }
     }
@@ -57,11 +57,11 @@ class ProjectGenerator {
     }
     validateSchema() {
         if (!this.schema || !this.schema.models) {
-            console.error('❌ Invalid schema: missing  models.');
+            console.error(chalk_1.default.red('❌ Invalid schema: missing  models.'));
             return false;
         }
         if (this.pattern !== 'MVC' && this.pattern !== 'Layered') {
-            console.error('❌ Invalid project pattern. Must be "MVC" or "Repository".');
+            console.error(chalk_1.default.red('❌ Invalid project pattern. Must be "MVC" or "Repository".'));
             return false;
         }
         if (!fs_1.default.existsSync(this.resolvedOutputPath)) {

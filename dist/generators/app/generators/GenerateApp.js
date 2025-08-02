@@ -7,6 +7,7 @@ exports.AppGenerator = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const ejs_1 = __importDefault(require("ejs"));
+const chalk_1 = __importDefault(require("chalk"));
 class AppGenerator {
     constructor(outputPath, models, databaseType, fileTemplatePath) {
         this.outputPath = outputPath;
@@ -15,8 +16,14 @@ class AppGenerator {
         this.fileTemplatePath = fileTemplatePath;
     }
     async generate() {
-        await this.generateAppFile();
-        await this.generateServerFile();
+        try {
+            await this.generateAppFile();
+            await this.generateServerFile();
+        }
+        catch (error) {
+            console.error(chalk_1.default.red('Failed to generate app or server file:', error));
+            throw error;
+        }
     }
     async generateAppFile() {
         const routerImports = this.models
@@ -34,7 +41,7 @@ class AppGenerator {
         });
         const appPath = path_1.default.join(this.outputPath, 'src', 'app.ts');
         fs_1.default.writeFileSync(appPath, appContent.trim());
-        console.log(`App file created: ${appPath}`);
+        console.log(chalk_1.default.green(`✅ App file created: ${appPath}`));
     }
     async generateServerFile() {
         const serverTemplatePath = path_1.default.join(this.fileTemplatePath, 'server.ejs');
@@ -42,7 +49,7 @@ class AppGenerator {
         const serverContent = await ejs_1.default.render(serverTemplate);
         const serverPath = path_1.default.join(this.outputPath, 'src', 'server.ts');
         fs_1.default.writeFileSync(serverPath, serverContent.trim());
-        console.log(`Server file created: ${serverPath}`);
+        console.log(chalk_1.default.green(`✅ Server file created: ${serverPath}`));
     }
 }
 exports.AppGenerator = AppGenerator;

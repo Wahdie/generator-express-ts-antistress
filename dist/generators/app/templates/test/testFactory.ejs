@@ -1,5 +1,6 @@
 import request from 'supertest';
 import app from '../../src/app';
+import { faker } from '@faker-js/faker';
 
 <% models.forEach(model => {
     const fields = objectToFieldArray(model.fields);
@@ -14,6 +15,7 @@ import app from '../../src/app';
       };
     });
 %>
+
 export async function createTest<%- model.name %>() {
   const random = Math.floor(Math.random() * 100000).toString();
   <% foreignKeys.forEach(fk => { %>
@@ -22,7 +24,7 @@ export async function createTest<%- model.name %>() {
   <% }) %>
   const res = await request(app)
     .post('/<%- model.name.toLowerCase() %>')
-    .send(<%- toJsLiteral(payload).replace(/"(`test_\$\{random\}`)"/g, '$1').replace(/"(`test_text_\$\{random\}`)"/g, '$1')%>);
+    .send(<%- toQuotedExpressionLiteral(payload)%>);
 
   return res.body.data.<%- toCamelCase(model.name) %>;
 }
