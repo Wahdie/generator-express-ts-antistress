@@ -124,23 +124,43 @@ Contoh Penulisan:
 ### Properti Field
 
 Properti `fields` berisi key-value pair, di mana *key* adalah nama field dan *value* adalah objek konfigurasinya.
+## Daftar Properti Field
 
-| Properti | Tipe | Deskripsi |
-| :--- | :--- | :--- |
-| `type` | `string` | **Wajib.** Berisi tipe data untuk field. Lihat daftar tipe yang didukung di bawah. |
-| `primaryKey`| `boolean`| Menandakan sebagai primary key. (true / false) |
-| `autoIncrement`|`boolean`| Mengaktifkan auto-increment (true / false). |
-| `required` | `boolean`| Untuk field ini tidak boleh kosong. (true / false) |
-| `unique` | `boolean`| Nilai field ini harus unik di dalam tabel. (true / false)|
-| `default` | `any` | Nilai default jika tidak ada nilai yang diberikan. |
-| `enum` | `array` | Daftar nilai yang diizinkan untuk field bertipe string/enum. |
-| `foreignKey`| `boolean`| Menandakan field ini sebagai foreign key. **Wajib ada** pada field yang menjadi dasar relasi `belongsTo` (format: `ModelNameId`, contoh: userId). |
-| `references`| `string` | Nama model dan field yang direferensikan (format: `"Model.Id"`, misal User.Id). |
-| `onDelete` | `string` | Aksi saat data di tabel referensi dihapus (e.g., "CASCADE", "SET NULL"). |
-| `onUpdate` | `string` | Aksi saat data di tabel referensi di-update (e.g., "CASCADE"). |
+| Properti      | Tipe     | Deskripsi         | Contoh                        |
+|---------------|----------|-------------------|-------------------------------|
+| `type`        | string   | **Wajib.** Berisi tipe data untuk field. Lihat daftar tipe yang didukung. | `{ "type": "string" }`        |
+| `primaryKey`  | boolean  | Menandakan bahwa field ini adalah primary key.                            | `{ "primaryKey": true }`      |
+| `autoIncrement` | boolean | Mengaktifkan fitur auto-increment pada field.                            | `{"autoIncrement": true}`   |
+| `required`    | boolean  | Menandakan bahwa field tidak boleh kosong (NOT NULL).                    | `{ "required": true }`        |
+| `unique`      | boolean  | Nilai field harus unik di dalam tabel.                                   | `{ "unique": true }`          |
+| `default`     | any      | Nilai default jika tidak ada nilai yang diberikan.                 | `{"default": "pending"}`<br>`{"default": 0}` |
+| `enum`        | array    | Daftar nilai yang diizinkan untuk field bertipe `string` atau `enum`.     | `{"enum": ["admin", "user"]}` |
+| `foreignKey`  | boolean  | Menandakan field sebagai foreign key. Wajib untuk relasi `belongsTo`.     | `{ "foreignKey": true }`      |
+| `references`  | string   | Referensi model dan field (format: `"Model.field"`).                     | `{ "references": "User.id" }` |
+| `onDelete`    | string   | Aksi ketika data referensi dihapus (`CASCADE`, `SET NULL`, dll).          | `{"onDelete": "CASCADE"}`   |
+| `onUpdate`    | string   | Aksi ketika data referensi di-update.                                     | `{"onUpdate": "CASCADE"}`   |
 
-**Tipe Data yang bisa digunakan untuk `type`:**
-`string`, `text`, `integer`, `float`, `double`, `decimal`, `bigint`, `boolean`, `date`, `datetime`, `timestamp`, `time`, `uuid`, `varchar`, `char`, `smallint`, `mediumint`, `tinyint`, `json`, `object`, `array`, `blob`, `binary`, `enum`, `objectId`.
+## Tipe Data yang Didukung
+
+Tipe data yang dapat digunakan pada properti `type` antara lain:
+
+| Tipe       | Deskripsi                                               | Contoh Penggunaan              |
+|------------|---------------------------------------------------------|--------------------------------|
+| `string`   | Teks umum, cocok untuk nama, email, dll.               | `{ "type": "string" }`         |
+| `text`     | Teks panjang, seperti deskripsi atau isi artikel.       | `{ "type": "text" }`           |
+| `integer`  | Angka bulat.                                            | `{ "type": "integer" }`        |
+| `float`    | Angka pecahan/desimal.                                  | `{ "type": "float" }`          |
+| `boolean`  | Nilai benar atau salah (`true`/`false`).                | `{ "type": "boolean" }`        |
+| `date`     | Tanggal saja (tanpa waktu).                             | `{ "type": "date" }`           |
+| `dateTime` | Tanggal dan waktu lengkap (ISO 8601).                   | `{ "type": "dateTime" }`       |
+| `uuid`     | Universally Unique Identifier (UUID).                  | `{ "type": "uuid" }`           |
+| `json`     | Objek atau array JSON. Cocok untuk data fleksibel.      | `{ "type": "json" }`           |
+| `enum`     | Digunakan bersama `enum` untuk membatasi pilihan nilai. | `{ "type": "string", "enum": ["A", "B"] }` |
+
+> 📌 **Catatan:**  
+> - Tipe `enum` harus berupa `string` yang disertai properti `enum` berupa array.
+> - Jika menggunakan Mongoose, tipe `dateTime` akan dikonversi ke `Date`.
+
 
 Contoh:
 
