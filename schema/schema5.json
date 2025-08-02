@@ -1,0 +1,74 @@
+{
+  "models": [
+    {
+      "name": "Student",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "studentNumber": { "type": "string", "required": true, "unique": true },
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true, "unique": true },
+        "birthDate": { "type": "date" },
+        "major": { "type": "string" },
+        "isActive": { "type": "boolean", "default": true }
+      },
+      "relations": {
+        "enrollments": { "type": "hasMany", "model": "Enrollment", "cascadeDelete": true }
+      }
+    },
+    {
+      "name": "Lecturer",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "unique": true },
+        "department": { "type": "string" }
+      },
+      "relations": {
+        "courses": { "type": "hasMany", "model": "Course" }
+      }
+    },
+    {
+      "name": "Course",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "code": { "type": "string", "required": true, "unique": true },
+        "title": { "type": "string", "required": true },
+        "credits": { "type": "integer", "required": true },
+        "lecturerId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Lecturer.id",
+          "onDelete": "SET NULL"
+        }
+      },
+      "relations": {
+        "lecturer": { "type": "belongsTo", "model": "Lecturer" },
+        "enrollments": { "type": "hasMany", "model": "Enrollment" }
+      }
+    },
+    {
+      "name": "Enrollment",
+      "fields": {
+        "id": { "type": "integer", "primaryKey": true, "autoIncrement": true },
+        "studentId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Student.id",
+          "onDelete": "CASCADE"
+        },
+        "courseId": {
+          "type": "integer",
+          "foreignKey": true,
+          "references": "Course.id",
+          "onDelete": "CASCADE"
+        },
+        "semester": { "type": "string", "required": true },
+        "grade": { "type": "string", "enum": ["A", "B", "C", "D", "E", "F"] }
+      },
+      "relations": {
+        "student": { "type": "belongsTo", "model": "Student" },
+        "course": { "type": "belongsTo", "model": "Course" }
+      }
+    }
+  ]
+}
